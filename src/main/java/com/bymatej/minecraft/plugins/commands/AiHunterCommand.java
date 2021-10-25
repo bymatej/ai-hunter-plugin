@@ -96,8 +96,9 @@ public class AiHunterCommand implements CommandExecutor {
         aiHunter.setSaturation(10);
         aiHunter.setSaturatedRegenRate(1);
         AttributeInstance maxHealthAttribute = aiHunter.getAttribute(GENERIC_MAX_HEALTH);
-        requireNonNull(maxHealthAttribute).setBaseValue(50);
-        aiHunter.setHealth(50);
+        requireNonNull(maxHealthAttribute).setBaseValue(500);
+        aiHunter.setHealth(500);
+        aiHunter.setFoodLevel(20);
         aiHunter.getInventory().setHelmet(new ItemStack(IRON_HELMET));
         aiHunter.getInventory().setChestplate(new ItemStack(IRON_CHESTPLATE));
         aiHunter.getInventory().setLeggings(new ItemStack(IRON_LEGGINGS));
@@ -116,6 +117,7 @@ public class AiHunterCommand implements CommandExecutor {
         AttributeInstance maxHealthAttribute = aiHunter.getAttribute(GENERIC_MAX_HEALTH);
         requireNonNull(maxHealthAttribute).setBaseValue(maxHealthAttribute.getDefaultValue());
         aiHunter.setHealth(20);
+        aiHunter.setFoodLevel(20);
         aiHunter.getInventory().setHelmet(new ItemStack(AIR));
         aiHunter.getInventory().setChestplate(new ItemStack(AIR));
         aiHunter.getInventory().setLeggings(new ItemStack(AIR));
