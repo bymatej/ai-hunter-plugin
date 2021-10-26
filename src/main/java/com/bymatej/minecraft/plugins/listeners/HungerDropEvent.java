@@ -11,23 +11,12 @@ public class HungerDropEvent implements Listener {
     public void onHungerDropEvent(FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
-            if (player.getName().equalsIgnoreCase("Matej2702")) { // todo: replace this line
-                //event.setCancelled(true);
+            if (player.getName().equalsIgnoreCase("Matej2702")) { // todo: replace this with hunter name
                 if (event.getFoodLevel() <= 6) {
                     event.setFoodLevel(20); // or 19 - decide todo
                 }
-            } else {
-                //event.setCancelled(false);
             }
         }
-
-        // todo: pseudo code:
-        // if player == hunter
-        /*
-        event.setCancelled(true);
-        event.setFoodLevel(20);
-        */
-
     }
 
 }
