@@ -1,19 +1,16 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
-import static java.lang.ClassLoader.getSystemClassLoader;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.Files.lines;
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
+import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.SEVERE;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -29,7 +26,7 @@ public class DbUtils {
 
     private static Connection getConnection() {
         try {
-            String dbUri = CommonUtils.getPluginReference().getConfig().getString("db_uri");
+            String dbUri = getPluginReference().getConfig().getString("db_uri");
             if (isNotBlank(dbUri)) {
                 Class.forName("org.sqlite.JDBC");
                 return DriverManager.getConnection(dbUri);
@@ -74,37 +71,12 @@ public class DbUtils {
         return "sql" + File.separatorChar + fileName;
     }
 
-    private static String getSqlFilePath(String filePath) {
-        // todo: this is broken
-        //System.out.println("AAAAAAAAAA");
-        //System.out.println(DbUtils.class.getClassLoader().getResource(filePath));
-        //URL resource = DbUtils.class.getClassLoader().getResource(filePath);
-        //try {
-        //    assert resource != null;
-        //    File f = new File(resource.toURI());
-        //} catch (URISyntaxException e) {
-        //    e.printStackTrace();
-        //}
-        //System.out.println("BBBBBBBBBB");
-        URL sqlFileUrl = DbUtils.class.getClassLoader().getResource(filePath);
-        if (sqlFileUrl != null && isNotBlank(sqlFileUrl.getFile())) {
-            return sqlFileUrl.getPath();
-        }
-
-        return null;
-    }
-
     private static String getSqlFileContent(String filePath) {
-        String sqlFilePath = getSqlFilePath(filePath);
-        if (isNotBlank(sqlFilePath)) {
-            StringBuilder contentBuilder = new StringBuilder();
-            try (Stream<String> stream = lines(Paths.get(filePath), UTF_8)) {
-                stream.forEach(s -> contentBuilder.append(s).append("\n"));
-            } catch (IOException e) {
-                CommonUtils.log(SEVERE, "Error reading the table creation SQL file", e);
-            }
+        if (isNotBlank(filePath)) {
+            return new BufferedReader(new InputStreamReader(requireNonNull(getPluginReference().getResource(filePath))))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
 
-            return contentBuilder.toString();
         }
 
         return null;
