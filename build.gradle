@@ -24,10 +24,22 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    implementation 'org.xerial:sqlite-jdbc:3.36.0.3'
+    testImplementation 'junit:junit:4.13.2'
+    testCompile 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
 }
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
         filter ReplaceTokens, tokens: [version: version]
+    }
+}
+
+test {
+    useJUnit()
+    maxHeapSize = '1G'
+    filter {
+        //include all tests from package
+        includeTestsMatching "com.bymatej.minecraft.plugins.aihunter.tests.*"
     }
 }

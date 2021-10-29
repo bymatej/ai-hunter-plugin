@@ -1,13 +1,12 @@
-package com.bymatej.minecraft.plugins.listeners;
+package com.bymatej.minecraft.plugins.aihunter.listeners;
 
-import com.bymatej.minecraft.plugins.utils.CommonUtils;
 import org.bukkit.Color;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-import static com.bymatej.minecraft.plugins.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 
 public class SaveCoordinatesOnDeathEvent implements Listener {
 

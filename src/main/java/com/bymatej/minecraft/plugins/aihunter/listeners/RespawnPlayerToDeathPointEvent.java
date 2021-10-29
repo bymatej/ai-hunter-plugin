@@ -1,13 +1,11 @@
-package com.bymatej.minecraft.plugins.listeners;
+package com.bymatej.minecraft.plugins.aihunter.listeners;
 
-import com.bymatej.minecraft.plugins.utils.CommonUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
-import static com.bymatej.minecraft.plugins.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static org.bukkit.Bukkit.dispatchCommand;
 import static org.bukkit.Bukkit.getServer;
 

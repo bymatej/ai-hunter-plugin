@@ -1,4 +1,4 @@
-package com.bymatej.minecraft.plugins.commands;
+package com.bymatej.minecraft.plugins.aihunter.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.AttributeInstance;
@@ -10,7 +10,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import static com.bymatej.minecraft.plugins.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;

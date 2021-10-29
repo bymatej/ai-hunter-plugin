@@ -1,0 +1,2 @@
+# Database
+db_uri: 'jdbc:sqlite::memory:?cache=shared'

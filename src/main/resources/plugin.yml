@@ -1,6 +1,6 @@
 name: AiHunterPlugin
 version: @version@
-main: com.bymatej.minecraft.plugins.AiHunterPlugin
+main: com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin
 api-version: 1.16
 prefix: AiHunterPlugin
 load: STARTUP

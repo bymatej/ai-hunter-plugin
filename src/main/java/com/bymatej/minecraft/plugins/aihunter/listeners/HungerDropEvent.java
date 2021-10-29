@@ -1,4 +1,4 @@
-package com.bymatej.minecraft.plugins.listeners;
+package com.bymatej.minecraft.plugins.aihunter.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
