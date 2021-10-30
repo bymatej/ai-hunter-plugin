@@ -1,5 +1,7 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
+import com.bymatej.minecraft.plugins.aihunter.data.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.utils.DbUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.Command;
@@ -10,7 +12,11 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Date;
+
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.removeHunter;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.storeHunterData;
 import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
@@ -24,7 +30,7 @@ public class AiHunterCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         try {
             if (sender instanceof Player ||
-                sender instanceof ConsoleCommandSender) {
+                    sender instanceof ConsoleCommandSender) {
                 executeCommand(sender, args);
 
                 return true;
@@ -104,6 +110,15 @@ public class AiHunterCommand implements CommandExecutor {
         aiHunter.getInventory().setLeggings(new ItemStack(IRON_LEGGINGS));
         aiHunter.getInventory().setBoots(new ItemStack(IRON_BOOTS));
 
+        HunterData hunterData = new HunterData(aiHunter.getName(),
+                aiHunter.getLocation().getX(),
+                aiHunter.getLocation().getY(),
+                aiHunter.getLocation().getZ(),
+                0,
+                new Date()
+        );
+        storeHunterData(hunterData);
+
         log("Hunter turned on");
     }
 
@@ -122,6 +137,8 @@ public class AiHunterCommand implements CommandExecutor {
         aiHunter.getInventory().setChestplate(new ItemStack(AIR));
         aiHunter.getInventory().setLeggings(new ItemStack(AIR));
         aiHunter.getInventory().setBoots(new ItemStack(AIR));
+
+        removeHunter(aiHunter.getName());
 
         log("Hunter turned off");
     }
