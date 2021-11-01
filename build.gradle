@@ -70,7 +70,7 @@ dependencies {
 
 processResources {
     // For Gradle 7
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.WARN
 
     from(sourceSets.main.resources.srcDirs) {
         filter ReplaceTokens, tokens: [version: version]
@@ -88,7 +88,7 @@ test {
 
 task buildJar(type: Jar) {
     // For Gradle 7
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.WARN
 
     manifest {
         attributes(
