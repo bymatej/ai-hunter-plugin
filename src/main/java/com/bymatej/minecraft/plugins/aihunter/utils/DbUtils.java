@@ -1,114 +1,111 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import com.bymatej.minecraft.plugins.aihunter.data.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.*;
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
-import static java.util.Objects.requireNonNull;
+import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.entityToData;
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static java.util.logging.Level.SEVERE;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class DbUtils {
 
-    public static void createTable() {
-        executeSqlQuery(getSqlFileContent(getSqlFilePathString("createTable.sql")));
-    }
-
-    public static void dropTable() {
-        executeSqlQuery(getSqlFileContent(getSqlFilePathString("dropTable.sql")));
-    }
-
-    public static void storeHunterData(HunterData hunter) {
-        // todo: refactor and move the query to file: https://stackoverflow.com/a/12745238
-        executeSqlQuery(String.format("INSERT INTO hunter (name, death_location_x, death_location_y, death_location_z, number_of_times_died, hunt_start_time)\n" +
-                        "VALUES (%s, %s, %s, %s, %s, NULL);",
-                hunter.getName(),
-                hunter.getDeathLocationX(),
-                hunter.getDeathLocationY(),
-                hunter.getDeathLocationZ(),
-                hunter.getNumberOfTimesDied()));
-    }
-
-    public static void removeHunter(String hunterName) {
-        // todo: refactor and move the query to file: https://stackoverflow.com/a/12745238
-        executeSqlQuery("DELETE FROM hunter WHERE name = '" + hunterName + "';");
-    }
-
-    public static void updateHunterCoordinates(HunterData hunter) {
-        // todo: refactor and move the query to file: https://stackoverflow.com/a/12745238
-        String query = String.format("UPDATE hunter SET death_location_x = %s, death_location_y = %s, death_location_z = %s WHERE name = %s;",
-                hunter.getDeathLocationX(),
-                hunter.getDeathLocationY(),
-                hunter.getDeathLocationZ(),
-                hunter.getName());
-        executeSqlQuery(query);
-    }
-
-    private static Connection getConnection() {
-        try {
-            String dbUri = getPluginReference().getConfig().getString("db_uri");
-            if (isNotBlank(dbUri)) {
-                Class.forName("org.sqlite.JDBC");
-                return DriverManager.getConnection(dbUri);
+    public static void createHunter(HunterData hunterData) {
+        System.out.println("1");
+        Transaction tx = null;
+        try (Session session = getFactory().openSession()) {
+            System.out.println("2");
+            tx = session.beginTransaction();
+            System.out.println("3");
+            Hunter hunter = entityToData(hunterData);
+            System.out.println("4");
+            session.save(hunter);
+            System.out.println("5");
+            tx.commit();
+            log("Hunter stored successfully.");
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            log(SEVERE, "Error connecting to the DB.", e);
-        }
 
-        return null;
-    }
-
-    private static void executeSqlQuery(String query) {
-        log("Executing the following query: \n\n" + query);
-        Connection connection = getConnection();
-        Statement statement = null;
-
-        try {
-            if (connection != null && isNotBlank(query)) {
-                statement = connection.createStatement();
-                statement.execute(query);
-                statement.close();
-                connection.close();
-            }
-        } catch (final SQLException e) {
-            log(SEVERE, "Failed to create table.", e);
-        } finally {
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                log(SEVERE, "Failed to create table.", e);
-            }
+            log(SEVERE, "Error saving hunter in DB", e);
         }
     }
 
-    private static String getSqlFilePathString(String fileName) {
-        return "sql" + File.separatorChar + fileName;
+    public static void deleteHunter(HunterData hunterData) {
+        Transaction tx = null;
+        try (Session session = getFactory().openSession()) {
+            tx = session.beginTransaction();
+            Hunter hunter = entityToData(hunterData);
+            session.remove(hunter);
+            tx.commit();
+            log("Hunter deleted successfully.");
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+
+            log(SEVERE, "Error removing hunter from DB", e);
+        }
     }
 
-    private static String getSqlFileContent(String filePath) {
-        if (isNotBlank(filePath)) {
-            return new BufferedReader(new InputStreamReader(requireNonNull(getPluginReference().getResource(filePath))))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
+    public static void updateHunterCoordinates(HunterData hunterData) {
+        Transaction tx = null;
+        try (Session session = getFactory().openSession()) {
+            tx = session.beginTransaction();
+            Hunter hunter = entityToData(hunterData);
+            session.update(hunter);
+            tx.commit();
+            log("Hunter coordinates updated successfully.");
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
 
+            log(SEVERE, "Error updating hunter coordinates in DB", e);
+        }
+    }
+
+    public static Hunter getHunterByName(HunterData hunterData) {
+        Hunter hunter = null;
+        Transaction tx = null;
+        try (Session session = getFactory().openSession()) {
+            tx = session.beginTransaction();
+            String hql = String.format("FROM hunter h WHERE h.name = '%s'", hunterData.getName());
+            Query query = session.createQuery(hql);
+            List results = query.list();
+            if (isNotEmpty(results)) {
+                hunter = (Hunter) results.get(0);
+            }
+            tx.commit();
+            log("Hunter retrieved by name successfully.");
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+
+            log(SEVERE, "Error updating hunter coordinates in DB", e);
         }
 
-        return null;
+        return hunter;
     }
+
+
+    private static SessionFactory getFactory() {
+//        return new Configuration().configure("hibernate.cfg.xml")
+        return new Configuration().configure()
+                .addAnnotatedClass(Hunter.class)
+                .addPackage("com.bymatej.minecraft.plugins.aihunter")
+                .buildSessionFactory();
+    }
+
 
 }

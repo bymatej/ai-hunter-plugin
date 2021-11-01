@@ -7,8 +7,6 @@ import com.bymatej.minecraft.plugins.aihunter.listeners.SaveCoordinatesOnDeathEv
 import org.bukkit.plugin.java.JavaPlugin;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.createTable;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.dropTable;
 import static java.util.Objects.requireNonNull;
 
 public final class AiHunterPlugin extends JavaPlugin {
@@ -23,8 +21,8 @@ public final class AiHunterPlugin extends JavaPlugin {
     }
 
     private void prepareDatabase() {
-        dropTable();
-        createTable();
+//        dropTable();
+//        createTable();
     }
 
     private void registerConfig() {
@@ -38,13 +36,13 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     private void registerEventListeners() {
         getServer().getPluginManager().registerEvents(new HungerDropEvent(), this);
-        getServer().getPluginManager().registerEvents(new SaveCoordinatesOnDeathEvent(), this);
-        getServer().getPluginManager().registerEvents(new RespawnPlayerToDeathPointEvent(), this);
+//        getServer().getPluginManager().registerEvents(new SaveCoordinatesOnDeathEvent(), this);
+//        getServer().getPluginManager().registerEvents(new RespawnPlayerToDeathPointEvent(), this);
     }
 
     @Override
     public void onDisable() {
-        dropTable();
+//        dropTable();
         log("Plugin un-loaded!");
     }
 

@@ -1,8 +1,10 @@
-package com.bymatej.minecraft.plugins.aihunter.data;
+package com.bymatej.minecraft.plugins.aihunter.data.hunter;
 
+import javax.persistence.Column;
 import java.util.Date;
 
 public class HunterData {
+    private int id;
 
     private String name;
 
@@ -16,16 +18,12 @@ public class HunterData {
 
     private Date huntStarTime;
 
-    public HunterData() {
+    public int getId() {
+        return id;
     }
 
-    public HunterData(String name, double deathLocationX, double deathLocationY, double deathLocationZ, int numberOfTimesDied, Date huntStarTime) {
-        this.name = name;
-        this.deathLocationX = deathLocationX;
-        this.deathLocationY = deathLocationY;
-        this.deathLocationZ = deathLocationZ;
-        this.numberOfTimesDied = numberOfTimesDied;
-        this.huntStarTime = huntStarTime;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

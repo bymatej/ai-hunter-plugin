@@ -1,6 +1,6 @@
 CREATE TABLE hunter
 (
-    id                   INTEGER PRIMARY KEY,
+    id                   INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT,
     name                 VARCHAR(255),
     death_location_x     REAL      DEFAULT 0.0,
     death_location_y     REAL      DEFAULT 0.0,

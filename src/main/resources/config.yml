@@ -1,2 +1,3 @@
-# Database
-db_uri: 'jdbc:sqlite::memory:?cache=shared'
+# Ai Hunter
+max_health: 500
+health: 500
