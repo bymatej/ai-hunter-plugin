@@ -29,12 +29,11 @@ dependencies {
     implementation 'org.hibernate:hibernate-core:5.6.1.Final'
 
     // Tests
-//    testCompile 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    testCompileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     testImplementation 'junit:junit:4.13.2'
 }
 
 processResources {
-    // For Gradle 7
     duplicatesStrategy = DuplicatesStrategy.WARN
 
     from(sourceSets.main.resources.srcDirs) {
@@ -52,7 +51,6 @@ test {
 }
 
 task buildJar(type: Jar) {
-    // For Gradle 7
     duplicatesStrategy = DuplicatesStrategy.WARN
 
     manifest {
@@ -60,8 +58,6 @@ task buildJar(type: Jar) {
                 'Main-Class': 'org.mycompany.mainclass'
         )
     }
-//    buildJar.setArchinveClassifier('all')
-//    buildJar.setArchivesBaseName('MyJar')
 //    archiveClassifier = 'all'
     archiveBaseName = 'AiHunterPlugin'
     from {
