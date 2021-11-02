@@ -1,12 +1,19 @@
-package com.bymatej.minecraft.plugins.utils;
+package com.bymatej.minecraft.plugins.aihunter.utils;
 
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 
+import com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin;
+
+import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPlugin;
 import static java.util.logging.Level.INFO;
 
 public class CommonUtils {
+
+    public static AiHunterPlugin getPluginReference() {
+        return getPlugin((AiHunterPlugin.class));
+    }
 
     public static void log(String message) {
         log(INFO, message);

@@ -1,22 +1,22 @@
-package com.bymatej.minecraft.plugins.commands;
+package com.bymatej.minecraft.plugins.aihunter.commands;
 
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.utils.DbUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandException;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import static com.bymatej.minecraft.plugins.utils.CommonUtils.log;
+import java.util.Date;
+
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static java.util.Objects.requireNonNull;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.*;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.bukkit.Material.*;
-import static org.bukkit.attribute.Attribute.*;
+import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class AiHunterCommand implements CommandExecutor {
 
@@ -24,7 +24,7 @@ public class AiHunterCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         try {
             if (sender instanceof Player ||
-                sender instanceof ConsoleCommandSender) {
+                    sender instanceof ConsoleCommandSender) {
                 executeCommand(sender, args);
 
                 return true;
@@ -95,6 +95,9 @@ public class AiHunterCommand implements CommandExecutor {
         //aiHunter.setInvulnerable(true);
         aiHunter.setSaturation(10);
         aiHunter.setSaturatedRegenRate(1);
+        int maxHealth = getPluginReference().getConfig().getInt("max_health");
+        int health = getPluginReference().getConfig().getInt("health");
+        // todo: pull all the values from config.yml
 //        AttributeInstance maxHealthAttribute = aiHunter.getAttribute(GENERIC_MAX_HEALTH);
 //        requireNonNull(maxHealthAttribute).setBaseValue(500);
 //        aiHunter.setHealth(500);
@@ -103,6 +106,22 @@ public class AiHunterCommand implements CommandExecutor {
         aiHunter.getInventory().setChestplate(new ItemStack(IRON_CHESTPLATE));
         aiHunter.getInventory().setLeggings(new ItemStack(IRON_LEGGINGS));
         aiHunter.getInventory().setBoots(new ItemStack(IRON_BOOTS));
+
+        HunterData hunterData = new HunterData();
+        hunterData.setName(aiHunter.getName());
+        hunterData.setDeathLocationX(aiHunter.getLocation().getX());
+        hunterData.setDeathLocationY(aiHunter.getLocation().getY());
+        hunterData.setDeathLocationZ(aiHunter.getLocation().getZ());
+        hunterData.setNumberOfTimesDied(0);
+        hunterData.setHuntStarTime(new Date());
+
+        System.out.println("before db");
+        try {
+            System.out.println("******* JEL RADI???");
+            DbUtils.createHunter(hunterData);
+        } catch (Exception e) {
+            log(SEVERE, "***** DB ERROR", e);
+        }
 
         log("Hunter turned on");
     }
@@ -122,6 +141,16 @@ public class AiHunterCommand implements CommandExecutor {
         aiHunter.getInventory().setChestplate(new ItemStack(AIR));
         aiHunter.getInventory().setLeggings(new ItemStack(AIR));
         aiHunter.getInventory().setBoots(new ItemStack(AIR));
+
+        HunterData hunterData = new HunterData();
+        hunterData.setName(aiHunter.getName());
+        hunterData.setDeathLocationX(aiHunter.getLocation().getX());
+        hunterData.setDeathLocationY(aiHunter.getLocation().getY());
+        hunterData.setDeathLocationZ(aiHunter.getLocation().getZ());
+        hunterData.setNumberOfTimesDied(0);
+        hunterData.setHuntStarTime(new Date());
+
+        DbUtils.deleteHunter(hunterData);
 
         log("Hunter turned off");
     }

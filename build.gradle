@@ -7,8 +7,8 @@ plugins {
 group = 'com.bymatej'
 version = '0.1-SNAPSHOT'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 repositories {
     mavenCentral()
@@ -24,10 +24,49 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'com.h2database:h2:1.4.200'
+    implementation 'org.hibernate:hibernate-core:5.6.1.Final'
+
+    // Tests
+    testCompileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
     from(sourceSets.main.resources.srcDirs) {
         filter ReplaceTokens, tokens: [version: version]
     }
+}
+
+test {
+    useJUnit()
+    maxHeapSize = '1G'
+    filter {
+        //include all tests from package
+        includeTestsMatching "com.bymatej.minecraft.plugins.aihunter.tests.*"
+    }
+}
+
+jar {
+    // Overrides the Jar task to always generate a fat jar (needed so that all the hibernate dependencies are available)
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    manifest {
+        attributes(
+                'Main-Class': 'org.mycompany.mainclass'
+        )
+    }
+//    archiveClassifier = 'all'
+    archiveBaseName = 'AiHunterPlugin'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+            {
+                exclude "META-INF/*.SF"
+                exclude "META-INF/*.DSA"
+                exclude "META-INF/*.RSA"
+            }
 }

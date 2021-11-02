@@ -1,22 +1,27 @@
-package com.bymatej.minecraft.plugins;
+package com.bymatej.minecraft.plugins.aihunter;
 
-import com.bymatej.minecraft.plugins.listeners.HungerDropEvent;
-import com.bymatej.minecraft.plugins.listeners.RespawnPlayerToDeathPointEvent;
-import com.bymatej.minecraft.plugins.listeners.SaveCoordinatesOnDeathEvent;
+import com.bymatej.minecraft.plugins.aihunter.commands.AiHunterCommand;
+import com.bymatej.minecraft.plugins.aihunter.listeners.HungerDropEvent;
+import com.bymatej.minecraft.plugins.aihunter.listeners.RespawnPlayerToDeathPointEvent;
+import com.bymatej.minecraft.plugins.aihunter.listeners.SaveCoordinatesOnDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.bymatej.minecraft.plugins.commands.AiHunterCommand;
-
-import static com.bymatej.minecraft.plugins.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static java.util.Objects.requireNonNull;
 
 public final class AiHunterPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        log("Plugin loaded!");
+        registerConfig();
         registerCommands();
         registerEventListeners();
+        log("Plugin loaded!");
+    }
+
+    private void registerConfig() {
+        getConfig().options().copyDefaults();
+        saveDefaultConfig();
     }
 
     private void registerCommands() {
