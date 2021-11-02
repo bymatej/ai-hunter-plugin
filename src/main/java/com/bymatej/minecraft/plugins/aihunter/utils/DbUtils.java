@@ -1,42 +1,34 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter;
 import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
 import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.boot.Metadata;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
+import org.hibernate.dialect.H2Dialect;
 import org.hibernate.query.Query;
+import org.hibernate.service.ServiceRegistry;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
-import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.entityToData;
+import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.*;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static java.util.logging.Level.SEVERE;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.hibernate.cfg.Environment.*;
 
 public class DbUtils {
 
     public static void createHunter(HunterData hunterData) {
-        System.out.println("1");
         Transaction tx = null;
-        try (Session session = getFactory().openSession()) {
-            System.out.println("2");
+        try (Session session = getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            System.out.println("3");
-            Hunter hunter = entityToData(hunterData);
-            System.out.println("4");
+            Hunter hunter = dataToEntity(hunterData);
             session.save(hunter);
-            System.out.println("5");
             tx.commit();
             log("Hunter stored successfully.");
         } catch (HibernateException e) {
@@ -50,9 +42,9 @@ public class DbUtils {
 
     public static void deleteHunter(HunterData hunterData) {
         Transaction tx = null;
-        try (Session session = getFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            Hunter hunter = entityToData(hunterData);
+            Hunter hunter = dataToEntity(hunterData);
             session.remove(hunter);
             tx.commit();
             log("Hunter deleted successfully.");
@@ -67,10 +59,14 @@ public class DbUtils {
 
     public static void updateHunterCoordinates(HunterData hunterData) {
         Transaction tx = null;
-        try (Session session = getFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            Hunter hunter = entityToData(hunterData);
-            session.update(hunter);
+            Hunter hunterToUpdate = getHunterByName(hunterData);
+            Hunter updatedHunter = dataToEntity(hunterData);
+            hunterToUpdate.setDeathLocationX(updatedHunter.getDeathLocationX());
+            hunterToUpdate.setDeathLocationY(updatedHunter.getDeathLocationY());
+            hunterToUpdate.setDeathLocationZ(updatedHunter.getDeathLocationZ());
+            session.update(hunterToUpdate);
             tx.commit();
             log("Hunter coordinates updated successfully.");
         } catch (HibernateException e) {
@@ -85,9 +81,9 @@ public class DbUtils {
     public static Hunter getHunterByName(HunterData hunterData) {
         Hunter hunter = null;
         Transaction tx = null;
-        try (Session session = getFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            String hql = String.format("FROM hunter h WHERE h.name = '%s'", hunterData.getName());
+            String hql = String.format("FROM Hunter h WHERE h.name = '%s'", hunterData.getName());
             Query query = session.createQuery(hql);
             List results = query.list();
             if (isNotEmpty(results)) {
@@ -106,17 +102,6 @@ public class DbUtils {
         return hunter;
     }
 
-
-    private static SessionFactory getFactory() {
-        return getSessionFactory();
-//        return new Configuration().configure()
-//                .addProperties(getHibernateProperties())
-//                .addAnnotatedClass(Hunter.class)
-//                .addPackage("com.bymatej.minecraft.plugins.aihunter")
-//                .buildSessionFactory();
-    }
-
-
     /**
      * This is sort of a hack because JAX-B would not get loaded into classpath inside Plugin.
      * <p>
@@ -130,59 +115,27 @@ public class DbUtils {
      * The only time I get the exception was when getFactory is called from within the Minecraft server that has this
      * plugin loaded.
      * <p>
-     * That's why I opted for this approach so that I don't have to read the "hibernate.cfg.xml" file and umarshal it.
+     * That's why I opted for this approach so that I don't have to read the "hibernate.cfg.xml" file and unmarshal it.
      * No XML, no issues. :)
      *
      * @return properties
      */
-    private static Properties getHibernateProperties() {
-        Properties properties = new Properties();
-        properties.setProperty("connection.url", "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter");
-        properties.setProperty("connection.driver_class", "org.h2.Driver");
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        properties.setProperty("current_session_context_class", "thread");
-        properties.setProperty("hbm2ddl.auto", "update");
+    private static SessionFactory getSessionFactory() {
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Hunter.class)
+                .setProperty(DIALECT, H2Dialect.class.getName())
+                .setProperty(DRIVER, org.h2.Driver.class.getName())
+                .setProperty(URL, "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=TRUE;FILE_LOCK=NO")
+                .setProperty(USER, "sa")
+                .setProperty(PASS, "")
+                .setProperty(CURRENT_SESSION_CONTEXT_CLASS, "thread")
+                .setProperty(HBM2DDL_AUTO, "update");
 
-        return properties;
-    }
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                .applySettings(configuration.getProperties())
+                .build();
 
-    public static SessionFactory getSessionFactory() {
-        SessionFactory sessionFactory = null;
-        StandardServiceRegistry registry = null;
-            try {
-
-                // Create registry builder
-                StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
-
-                // Hibernate settings equivalent to hibernate.cfg.xml's properties
-                Map<String, String> settings = new HashMap<>();
-                settings.put(Environment.DRIVER, "org.h2.Driver");
-                settings.put(Environment.URL, "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter");
-                settings.put(Environment.DIALECT, "org.hibernate.dialect.H2Dialect");
-
-                // Apply settings
-                registryBuilder.applySettings(settings);
-
-                // Create registry
-                registry = registryBuilder.build();
-
-                // Create MetadataSources
-                MetadataSources sources = new MetadataSources(registry);
-
-                // Create Metadata
-                Metadata metadata = sources.getMetadataBuilder().build();
-
-                // Create SessionFactory
-                sessionFactory = metadata.getSessionFactoryBuilder().build();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                if (registry != null) {
-                    StandardServiceRegistryBuilder.destroy(registry);
-                }
-            }
-
-        return sessionFactory;
+        return configuration.buildSessionFactory(serviceRegistry);
     }
 
 }

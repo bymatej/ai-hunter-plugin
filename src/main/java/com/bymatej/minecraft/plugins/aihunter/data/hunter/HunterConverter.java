@@ -16,7 +16,7 @@ public class HunterConverter {
         return hunterData;
     }
 
-    public static Hunter entityToData(HunterData hunterData) {
+    public static Hunter dataToEntity(HunterData hunterData) {
         Hunter hunter = new Hunter();
         hunter.setId(hunterData.getId());
         hunter.setName(hunterData.getName());

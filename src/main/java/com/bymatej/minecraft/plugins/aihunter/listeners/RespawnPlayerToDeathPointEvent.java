@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import java.util.Date;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.getHunterByName;
 
 public class RespawnPlayerToDeathPointEvent implements Listener {
 
@@ -30,7 +31,7 @@ public class RespawnPlayerToDeathPointEvent implements Listener {
         hunterData.setNumberOfTimesDied(0);
         hunterData.setHuntStarTime(new Date());
 
-        Hunter hunter = DbUtils.getHunterByName(hunterData);
+        Hunter hunter = getHunterByName(hunterData); // todo: test if this is even needed now
 
         if (hunter == null) {
             // if the event triggerer (player) is not our hunter, exit

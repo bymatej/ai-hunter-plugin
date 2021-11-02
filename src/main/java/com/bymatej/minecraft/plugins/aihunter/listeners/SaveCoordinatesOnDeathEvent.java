@@ -11,6 +11,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import java.util.Date;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.updateHunterCoordinates;
 
 public class SaveCoordinatesOnDeathEvent implements Listener {
 
@@ -36,7 +37,7 @@ public class SaveCoordinatesOnDeathEvent implements Listener {
 
 //        updateHunterCoordinates(hunterData);
 
-        DbUtils.updateHunterCoordinates(hunterData);
+        updateHunterCoordinates(hunterData); // todo: check if this is needed
     }
 
 }

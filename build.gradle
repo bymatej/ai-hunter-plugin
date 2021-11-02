@@ -50,7 +50,8 @@ test {
     }
 }
 
-task buildJar(type: Jar) {
+jar {
+    // Overrides the Jar task to always generate a fat jar (needed so that all the hibernate dependencies are available)
     duplicatesStrategy = DuplicatesStrategy.WARN
 
     manifest {
@@ -68,5 +69,4 @@ task buildJar(type: Jar) {
                 exclude "META-INF/*.DSA"
                 exclude "META-INF/*.RSA"
             }
-    with jar
 }

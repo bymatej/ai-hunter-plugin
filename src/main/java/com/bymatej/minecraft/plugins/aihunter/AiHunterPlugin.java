@@ -16,13 +16,7 @@ public final class AiHunterPlugin extends JavaPlugin {
         registerConfig();
         registerCommands();
         registerEventListeners();
-        prepareDatabase();
         log("Plugin loaded!");
-    }
-
-    private void prepareDatabase() {
-//        dropTable();
-//        createTable();
     }
 
     private void registerConfig() {
@@ -36,13 +30,12 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     private void registerEventListeners() {
         getServer().getPluginManager().registerEvents(new HungerDropEvent(), this);
-//        getServer().getPluginManager().registerEvents(new SaveCoordinatesOnDeathEvent(), this);
-//        getServer().getPluginManager().registerEvents(new RespawnPlayerToDeathPointEvent(), this);
+        getServer().getPluginManager().registerEvents(new SaveCoordinatesOnDeathEvent(), this);
+        getServer().getPluginManager().registerEvents(new RespawnPlayerToDeathPointEvent(), this);
     }
 
     @Override
     public void onDisable() {
-//        dropTable();
         log("Plugin un-loaded!");
     }
 
