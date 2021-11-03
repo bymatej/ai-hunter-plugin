@@ -1,14 +1,7 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -19,21 +12,20 @@ import org.hibernate.dialect.H2Dialect;
 import org.hibernate.query.Query;
 import org.hibernate.service.ServiceRegistry;
 
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
-import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.List;
 
 import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.dataToEntity;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static java.nio.file.Files.deleteIfExists;
 import static java.util.logging.Level.SEVERE;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.hibernate.cfg.Environment.CURRENT_SESSION_CONTEXT_CLASS;
-import static org.hibernate.cfg.Environment.DIALECT;
-import static org.hibernate.cfg.Environment.DRIVER;
-import static org.hibernate.cfg.Environment.HBM2DDL_AUTO;
-import static org.hibernate.cfg.Environment.PASS;
-import static org.hibernate.cfg.Environment.URL;
-import static org.hibernate.cfg.Environment.USER;
+import static org.hibernate.cfg.Environment.*;
 
 public class DbUtils {
 
@@ -183,9 +175,14 @@ public class DbUtils {
         // Mac path
         Path path1 = FileSystems.getDefault().getPath("/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter.mv.db");
         Path path2 = FileSystems.getDefault().getPath("/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter.trace.db");
+        // Linux path
+        Path path3 = FileSystems.getDefault().getPath("/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter.mv.db");
+        Path path4 = FileSystems.getDefault().getPath("/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter.trace.db");
         try {
             deleteIfExists(path1);
             deleteIfExists(path2);
+            deleteIfExists(path3);
+            deleteIfExists(path4);
         } catch (IOException e) {
             log(SEVERE, "Error deleting DB file", e);
         }
@@ -211,20 +208,19 @@ public class DbUtils {
      */
     private static SessionFactory getSessionFactory() {
         Configuration configuration = new Configuration()
-                                        .addAnnotatedClass(Hunter.class)
-                                        .setProperty(DIALECT, H2Dialect.class.getName())
-                                        .setProperty(DRIVER, org.h2.Driver.class.getName())
-                                        //.setProperty(URL, "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
-                                        .setProperty(URL,
-                                                     "jdbc:h2:/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
-                                        .setProperty(USER, "sa")
-                                        .setProperty(PASS, "")
-                                        .setProperty(CURRENT_SESSION_CONTEXT_CLASS, "thread")
-                                        .setProperty(HBM2DDL_AUTO, "update");
+                .addAnnotatedClass(Hunter.class)
+                .setProperty(DIALECT, H2Dialect.class.getName())
+                .setProperty(DRIVER, org.h2.Driver.class.getName())
+                .setProperty(URL, "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
+//                                        .setProperty(URL, "jdbc:h2:/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
+                .setProperty(USER, "sa")
+                .setProperty(PASS, "")
+                .setProperty(CURRENT_SESSION_CONTEXT_CLASS, "thread")
+                .setProperty(HBM2DDL_AUTO, "update");
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                                            .applySettings(configuration.getProperties())
-                                            .build();
+                .applySettings(configuration.getProperties())
+                .build();
 
         return configuration.buildSessionFactory(serviceRegistry);
     }

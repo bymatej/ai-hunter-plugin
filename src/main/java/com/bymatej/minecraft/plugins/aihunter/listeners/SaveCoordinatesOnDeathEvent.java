@@ -1,7 +1,6 @@
 package com.bymatej.minecraft.plugins.aihunter.listeners;
 
 import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
-import com.bymatej.minecraft.plugins.aihunter.utils.DbUtils;
 import org.bukkit.Color;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

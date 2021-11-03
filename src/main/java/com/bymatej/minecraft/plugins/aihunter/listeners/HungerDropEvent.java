@@ -1,12 +1,11 @@
 package com.bymatej.minecraft.plugins.aihunter.listeners;
 
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.exceptions.HunterException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
-import com.bymatej.minecraft.plugins.aihunter.exceptions.HunterException;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.getCurrentHunter;

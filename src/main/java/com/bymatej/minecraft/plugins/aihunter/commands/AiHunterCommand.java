@@ -1,18 +1,13 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
-import java.util.Date;
-
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandException;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
+import java.util.Date;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
@@ -22,11 +17,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.bukkit.Material.AIR;
-import static org.bukkit.Material.IRON_BOOTS;
-import static org.bukkit.Material.IRON_CHESTPLATE;
-import static org.bukkit.Material.IRON_HELMET;
-import static org.bukkit.Material.IRON_LEGGINGS;
+import static org.bukkit.Material.*;
 import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class AiHunterCommand implements CommandExecutor {

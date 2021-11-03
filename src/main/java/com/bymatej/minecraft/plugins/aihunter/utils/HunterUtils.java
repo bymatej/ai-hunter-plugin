@@ -1,18 +1,15 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import java.util.Date;
-
-import org.bukkit.entity.Player;
-
 import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
 import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
 import com.bymatej.minecraft.plugins.aihunter.exceptions.HunterException;
+import org.bukkit.entity.Player;
+
+import java.util.Date;
 
 import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.entityToData;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.deleteHunter;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.getHunter;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.getHunterByName;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.*;
 import static java.util.logging.Level.SEVERE;
 import static org.bukkit.Bukkit.getOnlinePlayers;
 

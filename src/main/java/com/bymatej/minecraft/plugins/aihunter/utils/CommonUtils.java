@@ -1,10 +1,9 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import java.util.logging.Level;
-
+import com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin;
 import org.bukkit.Bukkit;
 
-import com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin;
+import java.util.logging.Level;
 
 import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPlugin;
 import static java.util.logging.Level.INFO;

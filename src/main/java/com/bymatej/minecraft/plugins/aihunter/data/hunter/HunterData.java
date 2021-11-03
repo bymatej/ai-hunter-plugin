@@ -1,6 +1,5 @@
 package com.bymatej.minecraft.plugins.aihunter.data.hunter;
 
-import javax.persistence.Column;
 import java.util.Date;
 
 public class HunterData {

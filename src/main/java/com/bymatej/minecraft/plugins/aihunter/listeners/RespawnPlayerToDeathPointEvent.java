@@ -2,7 +2,6 @@ package com.bymatej.minecraft.plugins.aihunter.listeners;
 
 import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
 import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
-import com.bymatej.minecraft.plugins.aihunter.utils.DbUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,7 +10,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.util.Date;
 
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.getHunterByName;
 
 public class RespawnPlayerToDeathPointEvent implements Listener {
@@ -51,7 +49,6 @@ public class RespawnPlayerToDeathPointEvent implements Listener {
 
 //        DbUtils.
 //        event.setRespawnLocation();
-
 
 
         // todo: store world to DB along with coords, for now hack it with aihunter var (store Location object instead of coords)
