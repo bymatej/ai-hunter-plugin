@@ -1,21 +1,32 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
-import com.bymatej.minecraft.plugins.aihunter.utils.DbUtils;
+import java.util.Date;
+
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandException;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Date;
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.createHunter;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.deleteHunter;
 import static java.util.Objects.requireNonNull;
-import static java.util.logging.Level.*;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.bukkit.Material.*;
+import static org.bukkit.Material.AIR;
+import static org.bukkit.Material.IRON_BOOTS;
+import static org.bukkit.Material.IRON_CHESTPLATE;
+import static org.bukkit.Material.IRON_HELMET;
+import static org.bukkit.Material.IRON_LEGGINGS;
 import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class AiHunterCommand implements CommandExecutor {
@@ -23,8 +34,7 @@ public class AiHunterCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         try {
-            if (sender instanceof Player ||
-                    sender instanceof ConsoleCommandSender) {
+            if (sender instanceof Player || sender instanceof ConsoleCommandSender) {
                 executeCommand(sender, args);
 
                 return true;
@@ -98,9 +108,9 @@ public class AiHunterCommand implements CommandExecutor {
         int maxHealth = getPluginReference().getConfig().getInt("max_health");
         int health = getPluginReference().getConfig().getInt("health");
         // todo: pull all the values from config.yml
-//        AttributeInstance maxHealthAttribute = aiHunter.getAttribute(GENERIC_MAX_HEALTH);
-//        requireNonNull(maxHealthAttribute).setBaseValue(500);
-//        aiHunter.setHealth(500);
+        //        AttributeInstance maxHealthAttribute = aiHunter.getAttribute(GENERIC_MAX_HEALTH);
+        //        requireNonNull(maxHealthAttribute).setBaseValue(500);
+        //        aiHunter.setHealth(500);
         aiHunter.setFoodLevel(20);
         aiHunter.getInventory().setHelmet(new ItemStack(IRON_HELMET));
         aiHunter.getInventory().setChestplate(new ItemStack(IRON_CHESTPLATE));
@@ -115,13 +125,7 @@ public class AiHunterCommand implements CommandExecutor {
         hunterData.setNumberOfTimesDied(0);
         hunterData.setHuntStarTime(new Date());
 
-        System.out.println("before db");
-        try {
-            System.out.println("******* JEL RADI???");
-            DbUtils.createHunter(hunterData);
-        } catch (Exception e) {
-            log(SEVERE, "***** DB ERROR", e);
-        }
+        createHunter(hunterData);
 
         log("Hunter turned on");
     }
@@ -150,7 +154,7 @@ public class AiHunterCommand implements CommandExecutor {
         hunterData.setNumberOfTimesDied(0);
         hunterData.setHuntStarTime(new Date());
 
-        DbUtils.deleteHunter(hunterData);
+        deleteHunter(hunterData);
 
         log("Hunter turned off");
     }

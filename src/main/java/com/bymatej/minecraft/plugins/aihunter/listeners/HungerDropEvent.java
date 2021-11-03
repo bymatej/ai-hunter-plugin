@@ -5,16 +5,38 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.exceptions.HunterException;
+
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.getCurrentHunter;
+import static java.util.logging.Level.SEVERE;
+
 public class HungerDropEvent implements Listener {
 
     @EventHandler
     public void onHungerDropEvent(FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
-            if (player.getName().equalsIgnoreCase("Matej2702")) { // todo: replace this with hunter name
-                if (event.getFoodLevel() <= 6) {
-                    event.setFoodLevel(20); // or 19 - decide todo
-                }
+            feedHunter(player, event);
+        }
+    }
+
+    private void feedHunter(Player player, FoodLevelChangeEvent event) {
+        HunterData currentHunter = null;
+        try {
+            currentHunter = getCurrentHunter();
+        } catch (HunterException e) {
+            log(SEVERE, "There was no hunter found on the server.", e);
+        }
+
+        if (currentHunter == null) {
+            return;
+        }
+
+        if (player.getName().equalsIgnoreCase(currentHunter.getName())) {
+            if (event.getFoodLevel() <= 6) {
+                event.setFoodLevel(20); // or 19 - decide todo
             }
         }
     }

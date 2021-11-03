@@ -1,8 +1,14 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter;
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
-import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.List;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -13,13 +19,21 @@ import org.hibernate.dialect.H2Dialect;
 import org.hibernate.query.Query;
 import org.hibernate.service.ServiceRegistry;
 
-import java.util.List;
+import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
+import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
 
-import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.*;
+import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.dataToEntity;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static java.nio.file.Files.deleteIfExists;
 import static java.util.logging.Level.SEVERE;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.hibernate.cfg.Environment.*;
+import static org.hibernate.cfg.Environment.CURRENT_SESSION_CONTEXT_CLASS;
+import static org.hibernate.cfg.Environment.DIALECT;
+import static org.hibernate.cfg.Environment.DRIVER;
+import static org.hibernate.cfg.Environment.HBM2DDL_AUTO;
+import static org.hibernate.cfg.Environment.PASS;
+import static org.hibernate.cfg.Environment.URL;
+import static org.hibernate.cfg.Environment.USER;
 
 public class DbUtils {
 
@@ -83,11 +97,17 @@ public class DbUtils {
         Transaction tx = null;
         try (Session session = getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            String hql = String.format("FROM Hunter h WHERE h.name = '%s'", hunterData.getName());
-            Query query = session.createQuery(hql);
-            List results = query.list();
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Hunter> criteria = builder.createQuery(Hunter.class);
+            Root<Hunter> root = criteria.from(Hunter.class);
+            criteria.select(root).where(builder.equal(root.get("name"), hunterData.getName()));
+            Query<Hunter> query = session.createQuery(criteria);
+            query.setFirstResult(0);
+            query.setMaxResults(1);
+            List<Hunter> results = query.getResultList();
+
             if (isNotEmpty(results)) {
-                hunter = (Hunter) results.get(0);
+                hunter = results.get(0);
             }
             tx.commit();
             log("Hunter retrieved by name successfully.");
@@ -100,6 +120,75 @@ public class DbUtils {
         }
 
         return hunter;
+    }
+
+    /**
+     * There should be only one Hunter. This gets the first element from the hunters table.
+     */
+    public static Hunter getHunter() {
+        Hunter hunter = null;
+        Transaction tx = null;
+        try (Session session = getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Hunter> criteria = builder.createQuery(Hunter.class);
+            Root<Hunter> root = criteria.from(Hunter.class);
+            criteria.select(root);
+            Query<Hunter> query = session.createQuery(criteria);
+            query.setFirstResult(0);
+            query.setMaxResults(1);
+            List<Hunter> results = query.getResultList();
+
+            if (isNotEmpty(results)) {
+                hunter = results.get(0);
+            }
+            tx.commit();
+            log("Hunter retrieved successfully.");
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+
+            log(SEVERE, "Error updating hunter coordinates in DB", e);
+        }
+
+        return hunter;
+    }
+
+    public static void killDb() {
+        dropTableHunter();
+        deleteDbFile();
+    }
+
+    private static void dropTableHunter() {
+        Transaction tx = null;
+        try (Session session = getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            session.createSQLQuery("DROP TABLE Hunter").executeUpdate();
+            tx.commit();
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+
+            log(SEVERE, "Error updating hunter coordinates in DB", e);
+        }
+    }
+
+    /**
+     * This won't be needed for in-memory db. This will be deleted!
+     */
+    @Deprecated
+    private static void deleteDbFile() {
+        // Mac path
+        Path path1 = FileSystems.getDefault().getPath("/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter.mv.db");
+        Path path2 = FileSystems.getDefault().getPath("/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter.trace.db");
+        try {
+            deleteIfExists(path1);
+            deleteIfExists(path2);
+        } catch (IOException e) {
+            log(SEVERE, "Error deleting DB file", e);
+        }
     }
 
     /**
@@ -122,18 +211,20 @@ public class DbUtils {
      */
     private static SessionFactory getSessionFactory() {
         Configuration configuration = new Configuration()
-                .addAnnotatedClass(Hunter.class)
-                .setProperty(DIALECT, H2Dialect.class.getName())
-                .setProperty(DRIVER, org.h2.Driver.class.getName())
-                .setProperty(URL, "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=TRUE;FILE_LOCK=NO")
-                .setProperty(USER, "sa")
-                .setProperty(PASS, "")
-                .setProperty(CURRENT_SESSION_CONTEXT_CLASS, "thread")
-                .setProperty(HBM2DDL_AUTO, "update");
+                                        .addAnnotatedClass(Hunter.class)
+                                        .setProperty(DIALECT, H2Dialect.class.getName())
+                                        .setProperty(DRIVER, org.h2.Driver.class.getName())
+                                        //.setProperty(URL, "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
+                                        .setProperty(URL,
+                                                     "jdbc:h2:/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
+                                        .setProperty(USER, "sa")
+                                        .setProperty(PASS, "")
+                                        .setProperty(CURRENT_SESSION_CONTEXT_CLASS, "thread")
+                                        .setProperty(HBM2DDL_AUTO, "update");
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                .applySettings(configuration.getProperties())
-                .build();
+                                            .applySettings(configuration.getProperties())
+                                            .build();
 
         return configuration.buildSessionFactory(serviceRegistry);
     }

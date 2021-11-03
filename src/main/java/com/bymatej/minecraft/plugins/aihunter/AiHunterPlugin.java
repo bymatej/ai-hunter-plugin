@@ -4,9 +4,14 @@ import com.bymatej.minecraft.plugins.aihunter.commands.AiHunterCommand;
 import com.bymatej.minecraft.plugins.aihunter.listeners.HungerDropEvent;
 import com.bymatej.minecraft.plugins.aihunter.listeners.RespawnPlayerToDeathPointEvent;
 import com.bymatej.minecraft.plugins.aihunter.listeners.SaveCoordinatesOnDeathEvent;
+import com.bymatej.minecraft.plugins.aihunter.utils.DbUtils;
+import com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.killDb;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.removeCurrentHunter;
 import static java.util.Objects.requireNonNull;
 
 public final class AiHunterPlugin extends JavaPlugin {
@@ -36,6 +41,8 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        removeCurrentHunter();
+        killDb(); //todo consider if this is needed
         log("Plugin un-loaded!");
     }
 
