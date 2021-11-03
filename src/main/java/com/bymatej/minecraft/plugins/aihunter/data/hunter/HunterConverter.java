@@ -8,11 +8,7 @@ public class HunterConverter {
         HunterData hunterData = new HunterData();
         hunterData.setId(hunter.getId());
         hunterData.setName(hunter.getName());
-        hunterData.setDeathLocationX(hunter.getDeathLocationX());
-        hunterData.setDeathLocationY(hunter.getDeathLocationY());
-        hunterData.setDeathLocationZ(hunter.getDeathLocationZ());
         hunterData.setNumberOfTimesDied(hunter.getNumberOfTimesDied());
-        hunterData.setHuntStarTime(hunter.getHuntStarTime());
         return hunterData;
     }
 
@@ -20,11 +16,7 @@ public class HunterConverter {
         Hunter hunter = new Hunter();
         hunter.setId(hunterData.getId());
         hunter.setName(hunterData.getName());
-        hunter.setDeathLocationX(hunterData.getDeathLocationX());
-        hunter.setDeathLocationY(hunterData.getDeathLocationY());
-        hunter.setDeathLocationZ(hunterData.getDeathLocationZ());
         hunter.setNumberOfTimesDied(hunterData.getNumberOfTimesDied());
-        hunter.setHuntStarTime(hunterData.getHuntStarTime());
         return hunter;
     }
 

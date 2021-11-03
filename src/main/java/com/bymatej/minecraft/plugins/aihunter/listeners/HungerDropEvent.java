@@ -26,7 +26,7 @@ public class HungerDropEvent implements Listener {
         try {
             currentHunter = getCurrentHunter();
         } catch (HunterException e) {
-            log(SEVERE, "There was no hunter found on the server.", e);
+            log(SEVERE, "There was no hunter found on the server.");
         }
 
         if (currentHunter == null) {

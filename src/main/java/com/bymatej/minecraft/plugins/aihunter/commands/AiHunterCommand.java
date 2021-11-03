@@ -1,24 +1,16 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
 import org.bukkit.Bukkit;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.Date;
-
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.createHunter;
 import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.deleteHunter;
-import static java.util.Objects.requireNonNull;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.*;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.bukkit.Material.*;
-import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class AiHunterCommand implements CommandExecutor {
 
@@ -90,63 +82,27 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void turnAiHunterOn(Player aiHunter) {
+        try {
+            deleteHunter(getHunterDataForPlayer(aiHunter));
+        } catch (Exception e) {
+            log("Cannot delete - hunter does not exist");
+        }
+
+        armHunter(aiHunter);
+        createHunter(getHunterDataForPlayer(aiHunter));
         aiHunter.chat("You are now an AI Hunter. You cannot die!");
-
-        log("Is AI: " + aiHunter.hasAI());
-        //aiHunter.setInvulnerable(true);
-        aiHunter.setSaturation(10);
-        aiHunter.setSaturatedRegenRate(1);
-        int maxHealth = getPluginReference().getConfig().getInt("max_health");
-        int health = getPluginReference().getConfig().getInt("health");
-        // todo: pull all the values from config.yml
-        //        AttributeInstance maxHealthAttribute = aiHunter.getAttribute(GENERIC_MAX_HEALTH);
-        //        requireNonNull(maxHealthAttribute).setBaseValue(500);
-        //        aiHunter.setHealth(500);
-        aiHunter.setFoodLevel(20);
-        aiHunter.getInventory().setHelmet(new ItemStack(IRON_HELMET));
-        aiHunter.getInventory().setChestplate(new ItemStack(IRON_CHESTPLATE));
-        aiHunter.getInventory().setLeggings(new ItemStack(IRON_LEGGINGS));
-        aiHunter.getInventory().setBoots(new ItemStack(IRON_BOOTS));
-
-        HunterData hunterData = new HunterData();
-        hunterData.setName(aiHunter.getName());
-        hunterData.setDeathLocationX(aiHunter.getLocation().getX());
-        hunterData.setDeathLocationY(aiHunter.getLocation().getY());
-        hunterData.setDeathLocationZ(aiHunter.getLocation().getZ());
-        hunterData.setNumberOfTimesDied(0);
-        hunterData.setHuntStarTime(new Date());
-
-        createHunter(hunterData);
-
         log("Hunter turned on");
     }
 
     private void turnAiHunterOff(Player aiHunter) {
+        try {
+            deleteHunter(getHunterDataForPlayer(aiHunter));
+        } catch (Exception e) {
+            log("Cannot delete - hunter does not exist");
+        }
+
+        disarmHunter(aiHunter);
         aiHunter.chat("You are now a regular mortal player. You can die easily! Watch out!!!");
-
-        log("Is AI: " + aiHunter.hasAI());
-        //aiHunter.setInvulnerable(false);
-        aiHunter.setSaturation(0);
-        aiHunter.setSaturatedRegenRate(10);
-        AttributeInstance maxHealthAttribute = aiHunter.getAttribute(GENERIC_MAX_HEALTH);
-        requireNonNull(maxHealthAttribute).setBaseValue(maxHealthAttribute.getDefaultValue());
-        aiHunter.setHealth(20);
-        aiHunter.setFoodLevel(20);
-        aiHunter.getInventory().setHelmet(new ItemStack(AIR));
-        aiHunter.getInventory().setChestplate(new ItemStack(AIR));
-        aiHunter.getInventory().setLeggings(new ItemStack(AIR));
-        aiHunter.getInventory().setBoots(new ItemStack(AIR));
-
-        HunterData hunterData = new HunterData();
-        hunterData.setName(aiHunter.getName());
-        hunterData.setDeathLocationX(aiHunter.getLocation().getX());
-        hunterData.setDeathLocationY(aiHunter.getLocation().getY());
-        hunterData.setDeathLocationZ(aiHunter.getLocation().getZ());
-        hunterData.setNumberOfTimesDied(0);
-        hunterData.setHuntStarTime(new Date());
-
-        deleteHunter(hunterData);
-
         log("Hunter turned off");
     }
 

@@ -3,7 +3,6 @@ package com.bymatej.minecraft.plugins.aihunter;
 import com.bymatej.minecraft.plugins.aihunter.commands.AiHunterCommand;
 import com.bymatej.minecraft.plugins.aihunter.listeners.HungerDropEvent;
 import com.bymatej.minecraft.plugins.aihunter.listeners.RespawnPlayerToDeathPointEvent;
-import com.bymatej.minecraft.plugins.aihunter.listeners.SaveCoordinatesOnDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
@@ -32,7 +31,6 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     private void registerEventListeners() {
         getServer().getPluginManager().registerEvents(new HungerDropEvent(), this);
-        getServer().getPluginManager().registerEvents(new SaveCoordinatesOnDeathEvent(), this);
         getServer().getPluginManager().registerEvents(new RespawnPlayerToDeathPointEvent(), this);
     }
 

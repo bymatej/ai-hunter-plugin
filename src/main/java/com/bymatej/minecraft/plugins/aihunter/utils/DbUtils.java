@@ -15,14 +15,10 @@ import org.hibernate.service.ServiceRegistry;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.List;
 
 import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.dataToEntity;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static java.nio.file.Files.deleteIfExists;
 import static java.util.logging.Level.SEVERE;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.hibernate.cfg.Environment.*;
@@ -50,7 +46,7 @@ public class DbUtils {
         Transaction tx = null;
         try (Session session = getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            Hunter hunter = dataToEntity(hunterData);
+            Hunter hunter = getHunterByName(hunterData);
             session.remove(hunter);
             tx.commit();
             log("Hunter deleted successfully.");
@@ -63,15 +59,14 @@ public class DbUtils {
         }
     }
 
-    public static void updateHunterCoordinates(HunterData hunterData) {
+    public static void updateHunter(HunterData hunterData) {
         Transaction tx = null;
         try (Session session = getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             Hunter hunterToUpdate = getHunterByName(hunterData);
             Hunter updatedHunter = dataToEntity(hunterData);
-            hunterToUpdate.setDeathLocationX(updatedHunter.getDeathLocationX());
-            hunterToUpdate.setDeathLocationY(updatedHunter.getDeathLocationY());
-            hunterToUpdate.setDeathLocationZ(updatedHunter.getDeathLocationZ());
+            hunterToUpdate.setName(updatedHunter.getName());
+            hunterToUpdate.setNumberOfTimesDied(updatedHunter.getNumberOfTimesDied());
             session.update(hunterToUpdate);
             tx.commit();
             log("Hunter coordinates updated successfully.");
@@ -149,7 +144,6 @@ public class DbUtils {
 
     public static void killDb() {
         dropTableHunter();
-        deleteDbFile();
     }
 
     private static void dropTableHunter() {
@@ -164,27 +158,6 @@ public class DbUtils {
             }
 
             log(SEVERE, "Error updating hunter coordinates in DB", e);
-        }
-    }
-
-    /**
-     * This won't be needed for in-memory db. This will be deleted!
-     */
-    @Deprecated
-    private static void deleteDbFile() {
-        // Mac path
-        Path path1 = FileSystems.getDefault().getPath("/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter.mv.db");
-        Path path2 = FileSystems.getDefault().getPath("/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter.trace.db");
-        // Linux path
-        Path path3 = FileSystems.getDefault().getPath("/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter.mv.db");
-        Path path4 = FileSystems.getDefault().getPath("/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter.trace.db");
-        try {
-            deleteIfExists(path1);
-            deleteIfExists(path2);
-            deleteIfExists(path3);
-            deleteIfExists(path4);
-        } catch (IOException e) {
-            log(SEVERE, "Error deleting DB file", e);
         }
     }
 
@@ -211,8 +184,7 @@ public class DbUtils {
                 .addAnnotatedClass(Hunter.class)
                 .setProperty(DIALECT, H2Dialect.class.getName())
                 .setProperty(DRIVER, org.h2.Driver.class.getName())
-                .setProperty(URL, "jdbc:h2:/home/matej/projects/spigot-build-tools/test-mc-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
-//                                        .setProperty(URL, "jdbc:h2:/Users/matej/projects/private/minecraft/spigot-server-1.16.5/db/hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
+                .setProperty(URL, "jdbc:h2:mem:hunter;DB_CLOSE_ON_EXIT=FALSE;FILE_LOCK=NO")
                 .setProperty(USER, "sa")
                 .setProperty(PASS, "")
                 .setProperty(CURRENT_SESSION_CONTEXT_CLASS, "thread")
