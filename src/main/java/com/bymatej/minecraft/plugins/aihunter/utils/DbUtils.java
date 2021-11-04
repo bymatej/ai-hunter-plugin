@@ -89,8 +89,6 @@ public class DbUtils {
             Root<Hunter> root = criteria.from(Hunter.class);
             criteria.select(root).where(builder.equal(root.get("name"), hunterData.getName()));
             Query<Hunter> query = session.createQuery(criteria);
-            query.setFirstResult(0);
-            query.setMaxResults(1);
             List<Hunter> results = query.getResultList();
 
             if (isNotEmpty(results)) {
@@ -142,6 +140,21 @@ public class DbUtils {
         return hunter;
     }
 
+    public static void deleteAllHunters() {
+        Transaction tx = null;
+        try (Session session = getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            session.createSQLQuery("DELETE FROM Hunter").executeUpdate();
+            tx.commit();
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+
+            log(SEVERE, "Error deleting all hunters from DB", e);
+        }
+    }
+
     public static void killDb() {
         dropTableHunter();
     }
@@ -157,7 +170,7 @@ public class DbUtils {
                 tx.rollback();
             }
 
-            log(SEVERE, "Error updating hunter coordinates in DB", e);
+            log(SEVERE, "Error dropping the hunter table in DB", e);
         }
     }
 

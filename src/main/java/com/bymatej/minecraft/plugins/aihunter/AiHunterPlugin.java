@@ -6,14 +6,14 @@ import com.bymatej.minecraft.plugins.aihunter.listeners.RespawnPlayerToDeathPoin
 import org.bukkit.plugin.java.JavaPlugin;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.killDb;
-import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.removeCurrentHunter;
+import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.deleteAllHunters;
 import static java.util.Objects.requireNonNull;
 
 public final class AiHunterPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        deleteAllHunters();
         registerConfig();
         registerCommands();
         registerEventListeners();
@@ -36,8 +36,7 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        removeCurrentHunter();
-        killDb(); //todo consider if this is needed
+        deleteAllHunters();
         log("Plugin un-loaded!");
     }
 
