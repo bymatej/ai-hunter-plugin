@@ -3,11 +3,13 @@ package com.bymatej.minecraft.plugins.aihunter.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.createHunter;
 import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.deleteHunter;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.*;
+import static java.lang.System.currentTimeMillis;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -91,6 +93,7 @@ public class AiHunterCommand implements CommandExecutor {
         armHunter(aiHunter);
         createHunter(getHunterDataForPlayer(aiHunter));
         aiHunter.chat("You are now an AI Hunter. You cannot die!");
+        freezeHunter(aiHunter);
         log("Hunter turned on");
     }
 
@@ -104,6 +107,19 @@ public class AiHunterCommand implements CommandExecutor {
         disarmHunter(aiHunter);
         aiHunter.chat("You are now a regular mortal player. You can die easily! Watch out!!!");
         log("Hunter turned off");
+    }
+
+    private void freezeHunter(Player player) {
+        float walkSpeed = player.getWalkSpeed();
+        float flySpeed = player.getFlySpeed();
+        long finish = currentTimeMillis() + 10000; // end time is current time + 10000 ms (10s)
+        while (currentTimeMillis() < finish) {
+            System.out.println("**** FREEEZE");
+            player.setWalkSpeed(0);
+            player.setFlySpeed(0);
+        }
+        player.setWalkSpeed(walkSpeed);
+        player.setFlySpeed(flySpeed);
     }
 
 }
