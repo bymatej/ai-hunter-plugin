@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 
+import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.getCurrentHunter;
 import static java.util.logging.Level.SEVERE;
@@ -35,7 +36,7 @@ public class HungerDropEvent implements Listener {
 
         if (player.getName().equalsIgnoreCase(currentHunter.getName())) {
             if (event.getFoodLevel() <= 6) {
-                event.setFoodLevel(20); // or 19 - decide todo
+                event.setFoodLevel(getPluginReference().getConfig().getInt("hunter_armed_food_regen_level", 20));
             }
         }
     }
