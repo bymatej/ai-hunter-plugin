@@ -12,7 +12,7 @@ import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.getCurrentHunter;
 import static java.util.logging.Level.SEVERE;
 
-public class HungerDropEvent implements Listener {
+public class HungerDropEventListener implements Listener {
 
     @EventHandler
     public void onHungerDropEvent(FoodLevelChangeEvent event) {

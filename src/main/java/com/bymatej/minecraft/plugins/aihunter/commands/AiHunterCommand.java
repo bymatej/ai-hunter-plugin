@@ -1,18 +1,19 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
+import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.createHunter;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.deleteHunter;
-import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.*;
-import static java.lang.System.currentTimeMillis;
+import static com.bymatej.minecraft.plugins.aihunter.utils.Constants.COMMAND_AIHUNTER_ARGUMENT_OFF;
+import static com.bymatej.minecraft.plugins.aihunter.utils.Constants.COMMAND_AIHUNTER_ARGUMENT_ON;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.OFF;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.bukkit.Bukkit.getPluginManager;
 
 public class AiHunterCommand implements CommandExecutor {
 
@@ -37,9 +38,9 @@ public class AiHunterCommand implements CommandExecutor {
 
         validateCommand(sender, args);
         Player aiHunter = getAiHunterPlayer(sender, args[0]);
-        if ("on".equalsIgnoreCase(args[1])) {
+        if (COMMAND_AIHUNTER_ARGUMENT_ON.equalsIgnoreCase(args[1])) {
             turnAiHunterOn(aiHunter);
-        } else if ("off".equalsIgnoreCase(args[1])) {
+        } else if (COMMAND_AIHUNTER_ARGUMENT_OFF.equalsIgnoreCase(args[1])) {
             turnAiHunterOff(aiHunter);
         } else {
             String message = "Unrecognized parameter " + args[1];
@@ -84,46 +85,15 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void turnAiHunterOn(Player aiHunter) {
-        try {
-            deleteHunter(getHunterDataForPlayer(aiHunter));
-        } catch (Exception e) {
-            log("Cannot delete - hunter does not exist");
-        }
-
-        armHunter(aiHunter);
-        createHunter(getHunterDataForPlayer(aiHunter));
-        aiHunter.chat("You are now an AI Hunter. You cannot die!");
-        freezeHunter(aiHunter);
+        HunterToggleEvent hunterToggleEvent = new HunterToggleEvent(aiHunter, ON);
+        getPluginManager().callEvent(hunterToggleEvent);
         log("Hunter turned on");
     }
 
     private void turnAiHunterOff(Player aiHunter) {
-        try {
-            deleteHunter(getHunterDataForPlayer(aiHunter));
-        } catch (Exception e) {
-            log("Cannot delete - hunter does not exist");
-        }
-
-        disarmHunter(aiHunter);
-        aiHunter.chat("You are now a regular mortal player. You can die easily! Watch out!!!");
+        HunterToggleEvent hunterToggleEvent = new HunterToggleEvent(aiHunter, OFF);
+        getPluginManager().callEvent(hunterToggleEvent);
         log("Hunter turned off");
-    }
-
-    private void freezeHunter(Player player) {
-        // Todo: find a better way to execute a piece of code every X seconds
-        player.sendMessage("You will be teleported back for X seconds.");
-        Location initialLocation = player.getLocation();
-        long start = currentTimeMillis(); // start time is current time
-        long finish = start + 10000; // end time is start time + 10000 ms (10s)
-        while (currentTimeMillis() < finish) {
-            long thousandMilis = finish - currentTimeMillis();
-            boolean isOneSecond = thousandMilis % 1000 == 0;
-            if (isOneSecond) {
-                player.teleport(initialLocation);
-            }
-        }
-
-        player.sendMessage("You can hunt now!");
     }
 
 }

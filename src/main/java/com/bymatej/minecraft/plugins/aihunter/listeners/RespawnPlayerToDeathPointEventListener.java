@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.armHunter;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.isPlayerHunter;
 
-public class RespawnPlayerToDeathPointEvent implements Listener {
+public class RespawnPlayerToDeathPointEventListener implements Listener {
 
     @EventHandler
     public void onRespawnPlayerToDeathPoint(PlayerRespawnEvent event) {

@@ -1,8 +1,9 @@
 package com.bymatej.minecraft.plugins.aihunter;
 
 import com.bymatej.minecraft.plugins.aihunter.commands.AiHunterCommand;
-import com.bymatej.minecraft.plugins.aihunter.listeners.HungerDropEvent;
-import com.bymatej.minecraft.plugins.aihunter.listeners.RespawnPlayerToDeathPointEvent;
+import com.bymatej.minecraft.plugins.aihunter.listeners.HungerDropEventListener;
+import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
+import com.bymatej.minecraft.plugins.aihunter.listeners.RespawnPlayerToDeathPointEventListener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -32,8 +33,9 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     private void registerEventListeners() {
         PluginManager pluginManager = getServer().getPluginManager();
-        pluginManager.registerEvents(new HungerDropEvent(), this);
-        pluginManager.registerEvents(new RespawnPlayerToDeathPointEvent(), this);
+        pluginManager.registerEvents(new HunterToggleEventListener(), this);
+        pluginManager.registerEvents(new HungerDropEventListener(), this);
+        pluginManager.registerEvents(new RespawnPlayerToDeathPointEventListener(), this);
     }
 
     @Override
