@@ -23,20 +23,11 @@ What works:
 - config.yml
 - command on/off
 - in-memory db
+- freeze player
 
 
 
 Add features: 
-- cancel PlayerMoveEvent for a X seconds after hunter respawn, so the players can get away from hunter if they kill him
 - write documentation on how to use the plugin
 - add template for Impact Client hunter configuration
 - 
-
-Freeze player:
-In the method to turn on the hunter
-- toggle invulnerability to false
-- toggle it to true
-- keep it to true for X seconds
-- i onplayermove disable the movement if the player is hunter and invulnerability is true
-- disable vulnerabiliry after X seconds
-- disable this functionality if the vulnerability is true in config.yml and fallback to current logic
