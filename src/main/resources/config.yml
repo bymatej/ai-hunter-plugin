@@ -20,8 +20,4 @@ hunter_disarmed_saturation_regen_rate: 1
 hunter_disarmed_max_health: 20
 hunter_disarmed_health: 20
 hunter_disarmed_food_level: 20
-hunter_disarmed_helmet: 'AIR'
-hunter_disarmed_chestplate: 'AIR'
-hunter_disarmed_leggings: 'AIR'
-hunter_disarmed_boots: 'AIR'
 hunter_disarmed_pvp: True

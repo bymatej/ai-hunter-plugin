@@ -15,18 +15,6 @@ Challenges:
 - get a certain item (like diamond) before hunter gets you
 
 
-
-
-What works: 
-- HungerDropEvent
-- RespawnPlayerToDeathPointEvent
-- config.yml
-- command on/off
-- in-memory db
-- freeze player
-
-
-
 Add features: 
 - write documentation on how to use the plugin
 - add template for Impact Client hunter configuration
