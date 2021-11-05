@@ -23,11 +23,11 @@ What works:
 - config.yml
 - command on/off
 - in-memory db
+- freeze player
 
 
 
 Add features: 
-- cancel PlayerMoveEvent for a X seconds after hunter respawn, so the players can get away from hunter if they kill him
 - write documentation on how to use the plugin
 - add template for Impact Client hunter configuration
 - 

@@ -1,6 +1,6 @@
 # AI hunter armed
 hunter_armed_food_regen_level: 20
-hunter_armed_respawn_time_seconds: 10
+hunter_armed_move_delay_seconds: 10
 hunter_armed_invulnerable: False
 hunter_armed_saturation: 10
 hunter_armed_saturation_regen_rate: 1
