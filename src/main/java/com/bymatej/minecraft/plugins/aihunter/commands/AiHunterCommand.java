@@ -1,9 +1,9 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.createHunter;
@@ -110,16 +110,20 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void freezeHunter(Player player) {
-        float walkSpeed = player.getWalkSpeed();
-        float flySpeed = player.getFlySpeed();
-        long finish = currentTimeMillis() + 10000; // end time is current time + 10000 ms (10s)
+        // Todo: find a better way to execute a piece of code every X seconds
+        player.sendMessage("You will be teleported back for X seconds.");
+        Location initialLocation = player.getLocation();
+        long start = currentTimeMillis(); // start time is current time
+        long finish = start + 10000; // end time is start time + 10000 ms (10s)
         while (currentTimeMillis() < finish) {
-            System.out.println("**** FREEEZE");
-            player.setWalkSpeed(0);
-            player.setFlySpeed(0);
+            long thousandMilis = finish - currentTimeMillis();
+            boolean isOneSecond = thousandMilis % 1000 == 0;
+            if (isOneSecond) {
+                player.teleport(initialLocation);
+            }
         }
-        player.setWalkSpeed(walkSpeed);
-        player.setFlySpeed(flySpeed);
+
+        player.sendMessage("You can hunt now!");
     }
 
 }
