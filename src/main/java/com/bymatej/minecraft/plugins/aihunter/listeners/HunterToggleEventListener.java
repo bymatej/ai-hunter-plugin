@@ -3,6 +3,7 @@ package com.bymatej.minecraft.plugins.aihunter.listeners;
 import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
 import com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -42,6 +43,7 @@ public class HunterToggleEventListener implements Listener {
         createHunter(getHunterDataForPlayer(aiHunter));
         aiHunter.sendMessage("You are now an AI Hunter. You cannot die!");
         freezeHunter(aiHunter);
+        setWeather(aiHunter);
         // todo: execute baritone start hunter command
     }
 
@@ -49,6 +51,7 @@ public class HunterToggleEventListener implements Listener {
         deleteHunterIfExists(aiHunter);
         disarmHunter(aiHunter);
         aiHunter.sendMessage("You are now a regular mortal player. You can die easily! Watch out!!!");
+        setWeather(aiHunter);
         // todo: execute baritone start hunter command
     }
 
@@ -72,9 +75,9 @@ public class HunterToggleEventListener implements Listener {
 
         // Todo: write more efficient logic that executes a piece of code every X/4 seconds and prints the message every second
         Location initialLocation = player.getLocation();
-        int movementDelay = config.getInt("hunter_armed_move_delay_seconds", 10);
+        int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
         long start = currentTimeMillis(); // start time is current time
-        long finish = start + (1000 * movementDelay); // end time is start time + time in seconds configured in config.yml multiplied by 1000 to get milliseconds
+        long finish = start + (1000L * movementDelay); // end time is start time + time in seconds configured in config.yml multiplied by 1000 to get milliseconds
         int secondDivider = 4; // quarter
         int secondControl = 1;
         player.sendMessage(String.format("You will be teleported back to to %s/%s/%s for %s seconds.",
@@ -106,6 +109,15 @@ public class HunterToggleEventListener implements Listener {
 
         player.setInvulnerable(isHunterInvulnerable);
         player.sendMessage("You can hunt now!");
+    }
+
+    private void setWeather(Player player) {
+        if (getPluginReference().getConfig().getBoolean("day_and_clear_weather_on_hunter_toggle", true)) {
+            World world = player.getWorld();
+            world.setTime(1000L); // day
+            world.setStorm(false); // no storm
+            world.setThundering(false); // no thunder
+        }
     }
 
 }

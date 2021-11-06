@@ -18,7 +18,7 @@ import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.SEVERE;
 import static org.bukkit.Bukkit.getOnlinePlayers;
-import static org.bukkit.Material.*;
+import static org.bukkit.Material.valueOf;
 import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class HunterUtils {
@@ -71,21 +71,21 @@ public class HunterUtils {
         hunter.setFoodLevel(config.getInt("hunter_armed_food_level", 20));
         // Head
         PlayerInventory inventory = hunter.getInventory();
-        inventory.setHelmet(new ItemStack(valueOf(config.getString("hunter_armed_helmet", "CARVED_PUMPKIN"))));
-        inventory.setChestplate(new ItemStack(valueOf(config.getString("hunter_armed_chestplate", "IRON_CHESTPLATE"))));
-        inventory.setLeggings(new ItemStack(valueOf(config.getString("hunter_armed_leggings", "IRON_LEGGINGS"))));
-        inventory.setBoots(new ItemStack(valueOf(config.getString("hunter_armed_boots", "GOLDEN_BOOTS"))));
+        inventory.setHelmet(new ItemStack(valueOf(config.getString("hunter_helmet", "CARVED_PUMPKIN"))));
+        inventory.setChestplate(new ItemStack(valueOf(config.getString("hunter_chestplate", "IRON_CHESTPLATE"))));
+        inventory.setLeggings(new ItemStack(valueOf(config.getString("hunter_leggings", "IRON_LEGGINGS"))));
+        inventory.setBoots(new ItemStack(valueOf(config.getString("hunter_boots", "GOLDEN_BOOTS"))));
         // Inventory
-        ItemStack cobblestone = new ItemStack(COBBLESTONE);
-        ItemStack cookedBeef = new ItemStack(COOKED_BEEF);
+        ItemStack cobblestone = new ItemStack(valueOf(config.getString("hunter_blocks", "COBBLESTONE")));
+        ItemStack cookedBeef = new ItemStack(valueOf(config.getString("hunter_food", "COOKED_BEEF")));
         cobblestone.setAmount(cobblestone.getMaxStackSize());
         cookedBeef.setAmount(cookedBeef.getMaxStackSize());
         inventory.setHeldItemSlot(0);
-        inventory.setItem(0, new ItemStack(IRON_SWORD));
-        inventory.setItem(1, new ItemStack(STONE_AXE));
-        inventory.setItem(2, new ItemStack(DIAMOND_PICKAXE));
-        inventory.setItem(3, new ItemStack(GOLDEN_SHOVEL));
-        inventory.setItem(4, new ItemStack(WATER_BUCKET));
+        inventory.setItem(0, new ItemStack(valueOf(config.getString("hunter_main_hand_item", "IRON_SWORD"))));
+        inventory.setItem(1, new ItemStack(valueOf(config.getString("hunter_axe", "STONE_AXE"))));
+        inventory.setItem(2, new ItemStack(valueOf(config.getString("hunter_main_pickaxe", "DIAMOND_PICKAXE"))));
+        inventory.setItem(3, new ItemStack(valueOf(config.getString("hunter_shovel", "GOLDEN_SHOVEL"))));
+        inventory.setItem(4, new ItemStack(valueOf(config.getString("hunter_bucket", "WATER_BUCKET"))));
         inventory.setItem(5, cobblestone);
         inventory.setItem(6, cobblestone);
         inventory.setItem(7, cookedBeef);
@@ -94,17 +94,17 @@ public class HunterUtils {
             inventory.setItem(i, cobblestone);
         }
         for (int i = 18; i <= 20; i++) {
-            inventory.setItem(i, new ItemStack(IRON_SWORD));
+            inventory.setItem(i, new ItemStack(valueOf(config.getString("hunter_main_hand_item", "IRON_SWORD"))));
         }
         for (int i = 21; i < 23; i++) {
             inventory.setItem(i, cookedBeef);
         }
         for (int i = 23; i < 25; i++) {
-            inventory.setItem(i, new ItemStack(IRON_PICKAXE));
+            inventory.setItem(i, new ItemStack(valueOf(config.getString("hunter_secondary_pickaxe", "IRON_PICKAXE"))));
         }
         // Hands
-        inventory.setItemInMainHand(new ItemStack(IRON_SWORD));
-        inventory.setItemInOffHand(new ItemStack(SHIELD));
+        inventory.setItemInMainHand(new ItemStack(valueOf(config.getString("hunter_main_hand_item", "IRON_SWORD"))));
+        inventory.setItemInOffHand(new ItemStack(valueOf(config.getString("hunter_off_hand_item", "SHIELD"))));
         // World
         hunter.getWorld().setPVP(config.getBoolean("hunter_armed_pvp", true));
     }
