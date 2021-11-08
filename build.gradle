@@ -20,11 +20,16 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven {
+        name = 'citizens'
+        url = 'https://repo.citizensnpcs.co/'
+    }
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'net.citizensnpcs:citizens-main:2.0.28-SNAPSHOT'
 
     // Tests
     testCompileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
