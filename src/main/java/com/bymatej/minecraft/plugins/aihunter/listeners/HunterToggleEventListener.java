@@ -11,8 +11,6 @@ import org.bukkit.event.Listener;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.createHunter;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.deleteHunter;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.OFF;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.*;
@@ -40,11 +38,10 @@ public class HunterToggleEventListener implements Listener {
     private void hunterOn(Player aiHunter) {
         deleteHunterIfExists(aiHunter);
         armHunter(aiHunter);
-        createHunter(getHunterDataForPlayer(aiHunter));
         aiHunter.sendMessage("You are now an AI Hunter. You cannot die!");
         freezeHunter(aiHunter);
         setWeather(aiHunter);
-        // todo: execute baritone start hunter command
+        // todo: execute command to start hunter
     }
 
     private void hunterOff(Player aiHunter) {
@@ -52,15 +49,11 @@ public class HunterToggleEventListener implements Listener {
         disarmHunter(aiHunter);
         aiHunter.sendMessage("You are now a regular mortal player. You can die easily! Watch out!!!");
         setWeather(aiHunter);
-        // todo: execute baritone start hunter command
+        // todo: execute command to stop hunter
     }
 
     private void deleteHunterIfExists(Player aiHunter) {
-        try {
-            deleteHunter(getHunterDataForPlayer(aiHunter));
-        } catch (Exception e) {
-            log("Cannot delete - hunter does not exist");
-        }
+
     }
 
     /**
