@@ -1,7 +1,5 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterData;
-import com.bymatej.minecraft.plugins.aihunter.entities.hunter.Hunter;
 import com.bymatej.minecraft.plugins.aihunter.exceptions.HunterException;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,10 +9,8 @@ import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Date;
 
-import static com.bymatej.minecraft.plugins.aihunter.data.hunter.HunterConverter.entityToData;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static com.bymatej.minecraft.plugins.aihunter.utils.DbUtils.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.SEVERE;
 import static org.bukkit.Bukkit.getOnlinePlayers;
@@ -23,40 +19,21 @@ import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class HunterUtils {
 
-    public static HunterData getCurrentHunter() throws HunterException {
-        Hunter hunter = getHunter();
-        if (hunter != null) {
-            return entityToData(hunter);
-        }
-
-        return getCurrentHunterWithSafetyNet();
-    }
+//    public static HunterData getCurrentHunter() throws HunterException {
+//        Hunter hunter = getHunter();
+//        if (hunter != null) {
+//            return entityToData(hunter);
+//        }
+//
+//        return null;
+//    }
 
     public static void removeCurrentHunter() {
-        try {
-            deleteHunter(getCurrentHunter());
-        } catch (HunterException e) {
-            log(SEVERE, "There was no hunter found on the server. Nothing was deleted");
-        }
-    }
-
-    public static HunterData getHunterDataForPlayer(Player player) {
-        return getHunterDataForPlayer(player, null, null, null);
-    }
-
-    public static HunterData getHunterDataForPlayer(Player player, Integer numberOfTimesDied, Date huntStartTime, Integer databaseId) {
-        HunterData hunterData = new HunterData();
-        hunterData.setName(player.getName());
-
-        if (numberOfTimesDied != null) {
-            hunterData.setNumberOfTimesDied(numberOfTimesDied);
-        }
-
-        if (databaseId != null) {
-            hunterData.setId(databaseId);
-        }
-
-        return hunterData;
+//        try {
+//            deleteHunter(getCurrentHunter());
+//        } catch (HunterException e) {
+//            log(SEVERE, "There was no hunter found on the server. Nothing was deleted");
+//        }
     }
 
     public static void armHunter(Player hunter) {
@@ -126,32 +103,17 @@ public class HunterUtils {
     }
 
     public static boolean isPlayerHunter(Player player) {
-        try {
-            HunterData currentHunter = getCurrentHunter();
-            return currentHunter != null &&
-                    player != null &&
-                    player.getName().equals(currentHunter.getName());
-        } catch (HunterException e) {
-            log(SEVERE, "Error defining if the player is hunter or not. Assuming it is not.");
-            return false;
-        }
+//        try {
+//            HunterData currentHunter = getCurrentHunter();
+//            return currentHunter != null &&
+//                    player != null &&
+//                    player.getName().equals(currentHunter.getName());
+//        } catch (HunterException e) {
+//            log(SEVERE, "Error defining if the player is hunter or not. Assuming it is not.");
+//            return false;
+//        }
+        return false;
     }
 
-    private static HunterData getCurrentHunterWithSafetyNet() throws HunterException {
-        HunterData hunterData = null;
-        for (Player p : getOnlinePlayers()) {
-            Hunter hunter = getHunterByName(getHunterDataForPlayer(p));
-            if (hunter != null) {
-                hunterData = entityToData(hunter);
-                break;
-            }
-        }
-
-        if (hunterData != null) {
-            return hunterData;
-        } else {
-            throw new HunterException();
-        }
-    }
 
 }
