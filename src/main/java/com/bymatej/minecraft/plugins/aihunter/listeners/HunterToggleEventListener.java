@@ -9,11 +9,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
+import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.OFF;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
-import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.*;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.armHunter;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.disarmHunter;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.logging.Level.SEVERE;

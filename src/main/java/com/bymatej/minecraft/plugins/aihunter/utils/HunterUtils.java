@@ -1,19 +1,13 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import com.bymatej.minecraft.plugins.aihunter.exceptions.HunterException;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.util.Date;
-
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
 import static java.util.Objects.requireNonNull;
-import static java.util.logging.Level.SEVERE;
-import static org.bukkit.Bukkit.getOnlinePlayers;
 import static org.bukkit.Material.valueOf;
 import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 

@@ -9,7 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
 import static java.lang.Integer.parseInt;
 import static java.util.logging.Level.WARNING;

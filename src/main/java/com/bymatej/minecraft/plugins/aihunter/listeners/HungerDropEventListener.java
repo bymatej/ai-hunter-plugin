@@ -1,14 +1,9 @@
 package com.bymatej.minecraft.plugins.aihunter.listeners;
 
-import com.bymatej.minecraft.plugins.aihunter.exceptions.HunterException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.getPluginReference;
-import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
-import static java.util.logging.Level.SEVERE;
 
 public class HungerDropEventListener implements Listener {
 
