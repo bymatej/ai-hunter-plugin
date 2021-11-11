@@ -1,7 +1,7 @@
 name: AiHunterPlugin
 version: @version@
 main: com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin
-api-version: 1.16
+api-version: 1.17
 prefix: AiHunterPlugin
 load: STARTUP
 authors: [ Matej ]
@@ -9,8 +9,8 @@ description: AI Hunter plugin
 website: bymatej.com
 commands:
   aihunter:
-    description: Starts the AI hunter
-    usage: <command> playerName on/off
+    description: Starts the AI hunter(s). If the second parameter, the number of hunters, is ommited it defaults to 1.
+    usage: <command> hunterName numberOfHunters
     aliases:
       - hunter
       - ai

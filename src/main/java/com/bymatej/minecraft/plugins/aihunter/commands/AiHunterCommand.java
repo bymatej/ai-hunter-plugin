@@ -1,27 +1,29 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
+import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandException;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import static com.bymatej.minecraft.plugins.aihunter.utils.CommonUtils.log;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
 import static java.lang.Integer.parseInt;
 import static java.util.logging.Level.WARNING;
+import static org.bukkit.Bukkit.getPluginManager;
 
 public class AiHunterCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         try {
-            if (sender instanceof Player || sender instanceof ConsoleCommandSender) {
-                executeCommand(sender, args);
-
-                return true;
-            }
+            executeCommand(sender, args);
+            return true;
         } catch (CommandException ex) {
             log(WARNING, "Error executing the command.", ex);
-            return false;
         }
 
         return false;
@@ -30,16 +32,15 @@ public class AiHunterCommand implements CommandExecutor {
     private void executeCommand(CommandSender sender, String[] args) throws CommandException {
         log("Command is executing");
 
-        if (sender instanceof Player) {
-            if (sender.hasPermission("terminatornpc.spawnterminator")) { //todo: rename permission
-                validateCommand(sender, args);
+        if (sender instanceof Player && sender.hasPermission("terminatornpc.spawnterminator")) { //todo: rename permission
+            validateCommand(sender, args);
 
-                if (args.length == 1) {
-                    turnAiHunterOn(args[0], (Player) sender);
-                }
-                if (args.length == 2) {
-                    turnAiHunterOn(args[0], parseInt(args[1]), (Player) sender);
-                }
+            if (args.length == 1) {
+                turnAiHunterOn(args[0], (Player) sender);
+            }
+
+            if (args.length == 2) {
+                turnAiHunterOn(args[0], parseInt(args[1]), (Player) sender);
             }
         } else {
             String message = "You cannot execute this command. You're not a Player, or you don't have the permission.";
@@ -77,10 +78,11 @@ public class AiHunterCommand implements CommandExecutor {
             throw new CommandException(message);
         }
 
-        // Player with that name must not exist (although, if you name your hunter "ABC" and later on the player with that name joins - that's OK)
+        // The AI hunter must not have the same name as the real (human) player on the server
+        // But if a real (human) player that joins the server has the same name as the already existing hunter, that's fine
         Player player = Bukkit.getPlayer(aiHunterName);
         if (player != null) {
-            String message = "A real player with that game already exists on the server. Don't try to trick people!";
+            String message = "There is a real (human) player with that name on the server. Don't try to trick people!";
             sender.sendMessage(message);
             log(WARNING, message);
             throw new CommandException(message);
@@ -88,7 +90,7 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void validateDesiredHunterAmount(CommandSender sender, String desiredNumberOfHunters) {
-        int numberOfHunters = 0;
+        int numberOfHunters;
         try {
             numberOfHunters = parseInt(desiredNumberOfHunters);
         } catch (NumberFormatException e) {
@@ -99,7 +101,7 @@ public class AiHunterCommand implements CommandExecutor {
         }
 
         if (numberOfHunters < 1 || numberOfHunters > 200) {
-            String message = "Number of hunters is 0 or it is greater than 200. Not enough, or enough to kill a server. Chang the number!";
+            String message = "Number of hunters is 0 or it is greater than 200. Not enough, or enough to kill a server. Change the number!";
             sender.sendMessage(message);
             log(WARNING, message);
             throw new CommandException(message);
@@ -110,10 +112,10 @@ public class AiHunterCommand implements CommandExecutor {
         turnAiHunterOn(aiHunterName, 1, player);
     }
 
-    private void turnAiHunterOn(String aiHunterName, int amountOfHunters, Player player) {
-//        HunterToggleEvent hunterToggleEvent = new HunterToggleEvent(aiHunterName, ON); //todo: refactor HunterToggleEvent constructor/fields
-//        getPluginManager().callEvent(hunterToggleEvent);
-//        log("Hunter turned on");
+    private void turnAiHunterOn(String aiHunterName, int numberOfHunters, Player player) {
+        HunterToggleEvent hunterToggleEvent = new HunterToggleEvent(aiHunterName, numberOfHunters, ON, player);
+        getPluginManager().callEvent(hunterToggleEvent);
+        log("Hunter turned on");
     }
 
 }
