@@ -29,9 +29,6 @@ Check this out:
 So, instead of relying on Baritone/Impact, we could use NPCs. It does not require an additional account, and it is more lightweight.
 
 ### Todos:
-- remove Hibernate
-- remove H2 DB
-- add Citizens NPC plugin as a dependency (package as fat-jar)
 - re-create the logic for AI hunter: 
   - 10 seconds freeze after hunter creation
   - equip with certain items
