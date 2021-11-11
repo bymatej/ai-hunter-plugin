@@ -20,6 +20,7 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        plugin = this;
         registerConfig();
         registerCommands();
         registerEventListeners();

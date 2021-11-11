@@ -2,6 +2,7 @@ package com.bymatej.minecraft.plugins.aihunter.listeners;
 
 import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
 import com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -9,47 +10,57 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
-import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.OFF;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
-import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.armHunter;
-import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.disarmHunter;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.createHunter;
+import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
+import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.logging.Level.SEVERE;
 
 public class HunterToggleEventListener implements Listener {
 
+    public static List<NPC> aiHunters = new LinkedList<>();
+    static int hunterId = 0;
+
     @EventHandler
     public void onHunterToggleEvent(HunterToggleEvent event) {
-        Player aiHunter = event.getPlayer();
         HunterStatus status = event.getStatus();
-
         if (ON.equals(status)) {
-            hunterOn(aiHunter);
+            hunterOn(event);
         } else if (OFF.equals(status)) {
-            hunterOff(aiHunter);
+            hunterOff(event);
         } else {
             log(SEVERE, "Unrecognized status while toggling the hunter. Nothing got done!");
         }
-
     }
 
-    private void hunterOn(Player aiHunter) {
-        deleteHunterIfExists(aiHunter);
-        armHunter(aiHunter);
-        aiHunter.sendMessage("You are now an AI Hunter. You cannot die!");
-        freezeHunter(aiHunter);
-        setWeather(aiHunter);
+    private void hunterOn(HunterToggleEvent event) {
+        Player commandSender = event.getPlayer();
+        aiHunters = new LinkedList<>(); // remove all hunters
+        int numberOfHunters = event.getNumberOfHunters();
+        for (int i = 0; i < numberOfHunters; i++){
+            createHunter(event.getHunterName(), hunterId++, commandSender);
+        }
+//        armHunter(aiHunter); // todo: arm hunter inside HunterUtils
+        commandSender.sendMessage(format("You just spawned %s AI %s. RUN!", numberOfHunters,
+                numberOfHunters > 1 ? "Hunters" : "Hunter"));
+//        freezeHunter(aiHunter);
+        setWeather(commandSender);
         // todo: execute command to start hunter
     }
 
-    private void hunterOff(Player aiHunter) {
-        deleteHunterIfExists(aiHunter);
-        disarmHunter(aiHunter);
-        aiHunter.sendMessage("You are now a regular mortal player. You can die easily! Watch out!!!");
-        setWeather(aiHunter);
+    private void hunterOff(HunterToggleEvent event) {
+        Player commandSender = event.getPlayer();
+        aiHunters = new LinkedList<>(); // remove all hunters
+//        disarmHunter(aiHunter);
+        commandSender.sendMessage("Hunters are disabled. Thank God!");
+        setWeather(commandSender);
         // todo: execute command to stop hunter
     }
 
@@ -74,7 +85,7 @@ public class HunterToggleEventListener implements Listener {
         long finish = start + (1000L * movementDelay); // end time is start time + time in seconds configured in config.yml multiplied by 1000 to get milliseconds
         int secondDivider = 4; // quarter
         int secondControl = 1;
-        player.sendMessage(String.format("You will be teleported back to to %s/%s/%s for %s seconds.",
+        player.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
                 initialLocation.getX(),
                 initialLocation.getY(),
                 initialLocation.getZ(),
@@ -96,7 +107,7 @@ public class HunterToggleEventListener implements Listener {
             }
 
             if (secondControl == secondDivider + 1) {
-                player.sendMessage(String.format("You need to wait for %s more seconds before you can move.", --movementDelay));
+                player.sendMessage(format("You need to wait for %s more seconds before you can move.", --movementDelay));
                 secondControl = 1;
             }
         }

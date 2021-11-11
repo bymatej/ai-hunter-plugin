@@ -52,13 +52,11 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void validateCommand(CommandSender sender, String[] args) throws CommandException {
-        if (args.length == 1) {
-            validateDesiredAiHunterName(sender, args[0]);
-        }
-
-        if (args.length == 2) {
-            validateDesiredAiHunterName(sender, args[0]);
-            validateDesiredHunterAmount(sender, args[1]);
+        if (args.length < 1) {
+            String message = "No parameters were given. Unrecognized request";
+            sender.sendMessage(message);
+            log(WARNING, message);
+            throw new CommandException(message);
         }
 
         if (args.length > 2) {
@@ -66,6 +64,15 @@ public class AiHunterCommand implements CommandExecutor {
             sender.sendMessage(message);
             log(WARNING, message);
             throw new CommandException(message);
+        }
+
+        if (args.length == 1) {
+            validateDesiredAiHunterName(sender, args[0]);
+        }
+
+        if (args.length == 2) {
+            validateDesiredAiHunterName(sender, args[0]);
+            validateDesiredHunterAmount(sender, args[1]);
         }
     }
 

@@ -1,13 +1,19 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.npc.CitizensNPC;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
 import static java.util.Objects.requireNonNull;
+import static java.util.UUID.randomUUID;
+import static net.citizensnpcs.api.CitizensAPI.getNPCRegistry;
+import static net.citizensnpcs.npc.EntityControllers.createForType;
 import static org.bukkit.Material.valueOf;
 import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
@@ -109,5 +115,12 @@ public class HunterUtils {
         return false;
     }
 
+
+    public static void createHunter(String hunterName, int id, Player commandSender) {
+        NPC npc = new CitizensNPC(randomUUID(), id, hunterName, createForType(EntityType.PLAYER), getNPCRegistry());
+        npc.spawn(commandSender.getLocation());
+        npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
+        // todo: finish method
+    }
 
 }
