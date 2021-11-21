@@ -1,7 +1,10 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
+import com.bymatej.minecraft.plugins.aihunter.actions.HunterStuckAction;
+import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.npc.CitizensNPC;
+import net.citizensnpcs.trait.SkinTrait;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
@@ -116,11 +119,32 @@ public class HunterUtils {
     }
 
 
-    public static void createHunter(String hunterName, int id, Player commandSender) {
+    public static void createHunter(String hunterName, int id, Player commandSender) {//todo: finish up this method and add loadout stuff to the calling method before for loop and pass it on here
         NPC npc = new CitizensNPC(randomUUID(), id, hunterName, createForType(EntityType.PLAYER), getNPCRegistry());
         npc.spawn(commandSender.getLocation());
         npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
-        // todo: finish method
+        npc.getNavigator().getLocalParameters()
+                .attackRange(10)
+                .baseSpeed(1.6F)
+                .straightLineTargetingDistance(100)
+                .stuckAction(new HunterStuckAction())
+                .range(40);
+
+//        TerminatorFollow followTrait = new TerminatorFollow();
+//        followTrait.linkToNPC(npc);
+//        followTrait.run();
+//        followTrait.toggle(sender, false);
+//
+//        npc.addTrait(followTrait);
+//
+//        TerminatorTrait terminatorTrait = new TerminatorTrait(npc, terminatorLoadout.clone());
+//
+//        npc.addTrait(terminatorTrait);
+
+        SkinTrait skinTrait = npc.getOrAddTrait(SkinTrait.class);
+        skinTrait.setSkinName(hunterName);
+
+        HunterToggleEventListener.aiHunters.add(npc);
     }
 
 }
