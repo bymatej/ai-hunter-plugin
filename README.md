@@ -36,4 +36,8 @@ So, instead of relying on Baritone/Impact, we could use NPCs. It does not requir
   - make everything configurable in yml
   
  
+# Testing
+```
+./gradlew clean build && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar
+```
  

@@ -47,10 +47,8 @@ public class HunterToggleEventListener implements Listener {
         for (int i = 0; i < numberOfHunters; i++){
             createHunter(event.getHunterName(), hunterId++, commandSender);
         }
-//        armHunter(aiHunter); // todo: arm hunter inside HunterUtils
         commandSender.sendMessage(format("You just spawned %s AI %s. RUN!", numberOfHunters,
                 numberOfHunters > 1 ? "Hunters" : "Hunter"));
-//        freezeHunter(aiHunter);
         setWeather(commandSender);
         // todo: execute command to start hunter
     }
@@ -66,54 +64,6 @@ public class HunterToggleEventListener implements Listener {
 
     private void deleteHunterIfExists(Player aiHunter) {
 
-    }
-
-    /**
-     * Possibly the weirdest function I've ever written
-     *
-     * @param player
-     */
-    private void freezeHunter(Player player) {
-        player.setInvulnerable(false);
-        FileConfiguration config = getPluginReference().getConfig();
-        boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
-
-        // Todo: write more efficient logic that executes a piece of code every X/4 seconds and prints the message every second
-        Location initialLocation = player.getLocation();
-        int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
-        long start = currentTimeMillis(); // start time is current time
-        long finish = start + (1000L * movementDelay); // end time is start time + time in seconds configured in config.yml multiplied by 1000 to get milliseconds
-        int secondDivider = 4; // quarter
-        int secondControl = 1;
-        player.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
-                initialLocation.getX(),
-                initialLocation.getY(),
-                initialLocation.getZ(),
-                movementDelay));
-        while (currentTimeMillis() < finish) {
-            try {
-                sleep(1000 / secondDivider); // wait quarter of a second
-            } catch (InterruptedException e) {
-                log(SEVERE, "Failed to use Thread.sleep(500);");
-            }
-
-            // Teleporting
-            player.setInvulnerable(true);
-            player.teleport(initialLocation);
-
-            // Printing message
-            if (secondControl <= secondDivider + 1) { // +1 because we "used" one quarter, so we need to add it back
-                secondControl++;
-            }
-
-            if (secondControl == secondDivider + 1) {
-                player.sendMessage(format("You need to wait for %s more seconds before you can move.", --movementDelay));
-                secondControl = 1;
-            }
-        }
-
-        player.setInvulnerable(isHunterInvulnerable);
-        player.sendMessage("You can hunt now!");
     }
 
     private void setWeather(Player player) {
