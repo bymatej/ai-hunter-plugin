@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,10 +21,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin;
 
+import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
+
 public class HunterLoadout implements Listener {
 
+    FileConfiguration config = getPluginReference().getConfig();
+
     private final Inventory displayInventory;
-    private Material HELMET_ITEM = null;
+    private Material HELMET_ITEM = Material.CARVED_PUMPKIN;
     private Material CHESTPLATE_ITEM = null;
     private Material LEGGINGS_ITEM = null;
     private Material BOOTS_ITEM = null;

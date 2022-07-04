@@ -1,6 +1,5 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
-import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -9,8 +8,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
+import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
+
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
+import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static java.lang.Integer.parseInt;
 import static java.util.logging.Level.WARNING;
 import static org.bukkit.Bukkit.getPluginManager;
@@ -34,13 +35,18 @@ public class AiHunterCommand implements CommandExecutor {
 
         if (sender instanceof Player && sender.hasPermission("terminatornpc.spawnterminator")) { //todo: rename permission
             validateCommand(sender, args);
+            Player player = (Player) sender;
+
+            if (args.length == 0) {
+                turnAiHunterOn(null, player);
+            }
 
             if (args.length == 1) {
-                turnAiHunterOn(args[0], (Player) sender);
+                turnAiHunterOn(args[0], player);
             }
 
             if (args.length == 2) {
-                turnAiHunterOn(args[0], parseInt(args[1]), (Player) sender);
+                turnAiHunterOn(args[0], parseInt(args[1]), player);
             }
         } else {
             String message = "You cannot execute this command. You're not a Player, or you don't have the permission.";
@@ -52,13 +58,6 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void validateCommand(CommandSender sender, String[] args) throws CommandException {
-        if (args.length < 1) {
-            String message = "No parameters were given. Unrecognized request";
-            sender.sendMessage(message);
-            log(WARNING, message);
-            throw new CommandException(message);
-        }
-
         if (args.length > 2) {
             String message = "More than 2 parameters given. Unrecognized request";
             sender.sendMessage(message);
@@ -120,6 +119,10 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void turnAiHunterOn(String aiHunterName, int numberOfHunters, Player player) {
+        if (StringUtils.isBlank(aiHunterName)) {
+            aiHunterName = "CourageTheCowardlyDog";
+        }
+
         HunterToggleEvent hunterToggleEvent = new HunterToggleEvent(aiHunterName, numberOfHunters, ON, player);
         getPluginManager().callEvent(hunterToggleEvent);
         log("Hunter turned on");

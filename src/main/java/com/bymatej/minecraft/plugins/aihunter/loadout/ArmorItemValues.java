@@ -2,6 +2,7 @@ package com.bymatej.minecraft.plugins.aihunter.loadout;
 
 public enum ArmorItemValues {
     TURTLE_SHELL(2),
+    CARVED_PUMPKIN(1),
 
     LEATHER_HELMET(1),
     LEATHER_CHESTPLATE(3),

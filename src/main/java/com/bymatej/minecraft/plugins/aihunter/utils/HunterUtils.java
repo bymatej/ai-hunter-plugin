@@ -1,16 +1,13 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin;
-import com.bymatej.minecraft.plugins.aihunter.actions.HunterStuckAction;
-import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
-import com.bymatej.minecraft.plugins.aihunter.loadout.HunterLoadout;
-import com.bymatej.minecraft.plugins.aihunter.traits.HunterFollow;
-import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.npc.CitizensNPC;
-import net.citizensnpcs.trait.SkinTrait;
-
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,6 +17,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
+
+import com.bymatej.minecraft.plugins.aihunter.actions.HunterStuckAction;
+import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
+import com.bymatej.minecraft.plugins.aihunter.loadout.HunterLoadout;
+import com.bymatej.minecraft.plugins.aihunter.traits.HunterFollow;
+import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
+
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.npc.CitizensNPC;
+import net.citizensnpcs.trait.SkinTrait;
 
 import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
@@ -37,21 +44,21 @@ import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class HunterUtils {
 
-//    public static HunterData getCurrentHunter() throws HunterException {
-//        Hunter hunter = getHunter();
-//        if (hunter != null) {
-//            return entityToData(hunter);
-//        }
-//
-//        return null;
-//    }
+    //    public static HunterData getCurrentHunter() throws HunterException {
+    //        Hunter hunter = getHunter();
+    //        if (hunter != null) {
+    //            return entityToData(hunter);
+    //        }
+    //
+    //        return null;
+    //    }
 
     public static void removeCurrentHunter() {
-//        try {
-//            deleteHunter(getCurrentHunter());
-//        } catch (HunterException e) {
-//            log(SEVERE, "There was no hunter found on the server. Nothing was deleted");
-//        }
+        //        try {
+        //            deleteHunter(getCurrentHunter());
+        //        } catch (HunterException e) {
+        //            log(SEVERE, "There was no hunter found on the server. Nothing was deleted");
+        //        }
     }
 
     public static void armHunter(Player hunter) {
@@ -176,20 +183,20 @@ public class HunterUtils {
      *
      * @param npc
      */
-    private static void freezeHunter(NPC npc) {
-        Player player = (Player) npc.getEntity();
-        player.setInvulnerable(false);
+    public static void freezeHunter(NPC npc) {
+        Entity entity = npc.getEntity();
+        entity.setInvulnerable(false);
         FileConfiguration config = getPluginReference().getConfig();
         boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
 
         // Todo: write more efficient logic that executes a piece of code every X/4 seconds and prints the message every second
-        Location initialLocation = player.getLocation();
+        Location initialLocation = entity.getLocation();
         int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
         long start = currentTimeMillis(); // start time is current time
         long finish = start + (1000L * movementDelay); // end time is start time + time in seconds configured in config.yml multiplied by 1000 to get milliseconds
         int secondDivider = 4; // quarter
         int secondControl = 1;
-        player.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
+        entity.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
                                   initialLocation.getX(),
                                   initialLocation.getY(),
                                   initialLocation.getZ(),
@@ -202,8 +209,8 @@ public class HunterUtils {
             }
 
             // Teleporting
-            player.setInvulnerable(true);
-            player.teleport(initialLocation);
+            entity.setInvulnerable(true);
+            entity.teleport(initialLocation);
 
             // Printing message
             if (secondControl <= secondDivider + 1) { // +1 because we "used" one quarter, so we need to add it back
@@ -211,28 +218,127 @@ public class HunterUtils {
             }
 
             if (secondControl == secondDivider + 1) {
-                player.sendMessage(format("You need to wait for %s more seconds before you can move.", --movementDelay));
+                int secLeft = --movementDelay;
+                entity.sendMessage(format("You need to wait for %s more seconds before you can move.", secLeft));
+                getPluginReference().getServer().broadcastMessage((format("You need to wait for %s more seconds before you can move.", secLeft)));
                 secondControl = 1;
             }
         }
 
-        player.setInvulnerable(isHunterInvulnerable);
-        player.sendMessage("You can hunt now!");
+        entity.setInvulnerable(isHunterInvulnerable);
+        entity.sendMessage("You can hunt now!");
+    }
+
+    public static void freezeHunter2(NPC npc) {
+        Entity entity = npc.getEntity();
+        entity.setInvulnerable(false);
+        FileConfiguration config = getPluginReference().getConfig();
+        boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
+
+        Location initialLocation = entity.getLocation();
+        int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
+        entity.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
+                                  initialLocation.getX(),
+                                  initialLocation.getY(),
+                                  initialLocation.getZ(),
+                                  movementDelay));
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            int counter = 1;
+
+            @Override
+            public void run() {
+                // Teleporting
+                entity.setInvulnerable(true);
+                entity.teleport(initialLocation);
+
+                // Messages
+                int secLeft = movementDelay;
+                secLeft--;
+                entity.sendMessage(format("You need to wait for %s more seconds before you can move.", secLeft));
+                getPluginReference().getServer().broadcastMessage((format("The hunter will start hunting you in %s seconds.", secLeft)));
+
+                // Flow control for timer
+                counter++;
+                if (counter > movementDelay) {
+                    timer.cancel();
+                }
+            }
+        }, 0L, movementDelay * 1000L);
+
+        entity.setInvulnerable(isHunterInvulnerable);
+        entity.sendMessage("You can hunt now!");
+    }
+
+    public static void freezeHunter3(NPC npc, Player commandSender) {
+        Entity entity = npc.getEntity();
+        entity.setInvulnerable(false);
+        FileConfiguration config = getPluginReference().getConfig();
+        boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
+
+        Location initialLocation = commandSender.getLocation();
+        int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
+        entity.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
+                                  initialLocation.getX(),
+                                  initialLocation.getY(),
+                                  initialLocation.getZ(),
+                                  movementDelay));
+        getPluginReference().getServer().broadcastMessage(format("Hunter will be repeatedly teleported back to to %s/%s/%s for %s seconds.",
+                                                                 initialLocation.getX(),
+                                                                 initialLocation.getY(),
+                                                                 initialLocation.getZ(),
+                                                                 movementDelay));
+
+        long lastSec = 0;
+        long initSec = System.currentTimeMillis() / 1000;
+        long sec = 0;
+        while (true) {
+            if (sec == 0) {
+                sec = initSec;
+            } else {
+                sec = System.currentTimeMillis() / 1000;
+            }
+
+            if (sec != lastSec) {
+                // Teleporting
+                entity.setInvulnerable(true);
+                entity.teleport(initialLocation);
+
+                // Messages
+                long secLeft = 0;
+                if (lastSec == 0) {
+                    secLeft = movementDelay;
+                } else {
+                    secLeft = movementDelay - (lastSec - initSec);
+                }
+                entity.sendMessage(format("You need to wait for %s more seconds before you can move.", secLeft));
+                getPluginReference().getServer().broadcastMessage((format("The hunter will start hunting you in %s seconds.", secLeft)));
+                Bukkit.getLogger().log(Level.INFO, "Hunter sleeps for " + secLeft + " more seconds");
+                lastSec = sec;
+            }
+
+            if ((lastSec - initSec) == movementDelay) { //todo: move to while instead of while(true)
+                break;
+            }
+        }
+
+        entity.setInvulnerable(isHunterInvulnerable);
+        entity.sendMessage("You can hunt now!");
     }
 
     public static boolean isPlayerHunter(Player player) {
-//        try {
-//            HunterData currentHunter = getCurrentHunter();
-//            return currentHunter != null &&
-//                    player != null &&
-//                    player.getName().equals(currentHunter.getName());
-//        } catch (HunterException e) {
-//            log(SEVERE, "Error defining if the player is hunter or not. Assuming it is not.");
-//            return false;
-//        }
+        //        try {
+        //            HunterData currentHunter = getCurrentHunter();
+        //            return currentHunter != null &&
+        //                    player != null &&
+        //                    player.getName().equals(currentHunter.getName());
+        //        } catch (HunterException e) {
+        //            log(SEVERE, "Error defining if the player is hunter or not. Assuming it is not.");
+        //            return false;
+        //        }
         return false;
     }
-
 
     public static void createHunter(String hunterName, int id, Player commandSender) {//todo: finish up this method and add loadout stuff to the calling method before for loop and pass it on here
         // Create the hunter
@@ -240,11 +346,11 @@ public class HunterUtils {
         npc.spawn(commandSender.getLocation());
         npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
         npc.getNavigator().getLocalParameters()
-                .attackRange(6) // was 10, now is 6
-                .baseSpeed(1.4F)  // was 1.6 now is 1.4
-                .straightLineTargetingDistance(200)  // was 100 now is 200
-                .stuckAction(new HunterStuckAction())
-                .range(60);  // was 40, now is 60
+           .attackRange(6) // was 10, now is 6
+           .baseSpeed(1.4F)  // was 1.6 now is 1.4
+           .straightLineTargetingDistance(200)  // was 100 now is 200
+           .stuckAction(new HunterStuckAction())
+           .range(60);  // was 40, now is 60
 
         // Arm the hunter
         armHunter(npc);
@@ -253,10 +359,10 @@ public class HunterUtils {
         followTrait.linkToNPC(npc);
         followTrait.run();
         followTrait.toggle(commandSender, false);
-//
+        //
         npc.addTrait(followTrait);
 
-        HunterTrait hunterTrait = new HunterTrait(npc, new HunterLoadout(AiHunterPlugin.getPluginReference())); // todo: remove newLoadout
+        HunterTrait hunterTrait = new HunterTrait(npc, new HunterLoadout(getPluginReference())); // todo: remove newLoadout
 
         npc.addTrait(hunterTrait);
 
@@ -266,7 +372,9 @@ public class HunterUtils {
         HunterToggleEventListener.aiHunters.add(npc);
 
         // Freeze the hunter
-        freezeHunter(npc);
+        //freezeHunter(npc);//todo
+        //freezeHunter2(npc);//todo
+        freezeHunter3(npc, commandSender);//todo
     }
 
     public static boolean isLookingTowards(Location myLoc, Location theirLoc, float yawLimit, float pitchLimit) {
@@ -301,13 +409,11 @@ public class HunterUtils {
             // Set yaw start value based on dx
             if (dx < 0) {
                 yaw = 1.5 * Math.PI;
-            }
-            else {
+            } else {
                 yaw = 0.5 * Math.PI;
             }
             yaw -= Math.atan(dz / dx); // or atan2?
-        }
-        else if (dz < 0) {
+        } else if (dz < 0) {
             yaw = Math.PI;
         }
         return (float) (-yaw * (180.0 / Math.PI));

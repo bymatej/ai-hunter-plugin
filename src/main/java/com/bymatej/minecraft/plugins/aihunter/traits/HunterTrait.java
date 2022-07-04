@@ -14,7 +14,6 @@ import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -38,61 +37,73 @@ import net.citizensnpcs.util.Util;
 
 public class HunterTrait extends Trait {
 
-    Random random = new Random();
+    private Random random = new Random();
 
     private final NPC hunter;
+
     private UUID activeTarget = null;
+
     private int attackCooldown = 0;
+
     private int jumpCooldown = 0;
+
     private final List<Block> scheduledBrokenBlocks = new LinkedList<>();
-    private final int state = 0;
 
-    // Built in stuck features only apply if the NPC is just far away it seems. The name is misleading
-    boolean isStuck = false;
-    boolean hasLineOfSight = true;
+    private boolean isStuck = false; // Built in stuck features only apply if the NPC is just far away it seems. The name is misleading
 
-    boolean updatedThisTick = false;
-    int followThroughDimension = 0;
+    private boolean hasLineOfSight = true;
 
+    private boolean updatedThisTick = false;
 
-    boolean shouldBeStopped = false;
+    private int followThroughDimension = 0;
 
-    boolean isCurrentlyPlacingUpwards = false;
-    boolean isCurrentlyDiggingDownwards = false;
+    private boolean shouldBeStopped = false;
 
-    boolean isCurrentlyBreakingABlock = false;
-    Block blockCurrentlyBeingBroken = null;
+    private boolean isCurrentlyPlacingUpwards = false;
 
-    boolean isBreakingWhileUpwards = false;
-    boolean teleportedRecently = false;
+    private boolean isCurrentlyDiggingDownwards = false;
 
-    int blockPlaceCooldown = 0;
-    int targetSearchTimer = 0;
-    int respawnTimer = 0;
+    private boolean isCurrentlyBreakingABlock = false;
 
-    boolean shouldJump = true;
-    public int blockPlaceTimeout = 0;
-    Location targetsSwitchedWorldsLocation = null;
-    int boatClutchCooldown = 0;
+    private Block blockCurrentlyBeingBroken = null;
 
-    List<BlockFace> placeableBlockFaces = new LinkedList<>();
+    private boolean isBreakingWhileUpwards = false;
 
-    Location location;
+    private boolean teleportedRecently = false;
 
-    boolean isInWater = false;
+    private int blockPlaceCooldown = 0;
 
-    int teleportTimer = 0;
+    private int targetSearchTimer = 0;
 
-    public boolean delete = false;
-    public boolean isFullSwimming = false;
+    private int respawnTimer = 0;
 
-    public boolean needsArmorUpdate = true;
+    private boolean shouldJump = true;
+
+    private int blockPlaceTimeout = 0;
+
+    private Location targetsSwitchedWorldsLocation = null;
+
+    private int boatClutchCooldown = 0;
+
+    private List<BlockFace> placeableBlockFaces = new LinkedList<>();
+
+    private Location location;
+
+    private boolean isInWater = false;
+
+    private int teleportTimer = 0;
+
+    private static final boolean DELETE = false;
+
+    private boolean isFullSwimming = false;
+
+    private boolean needsArmorUpdate = true;
 
     private final HunterLoadout hunterLoadout;
 
-    public boolean debug = false;
+    private boolean debug = false; // todo: turn to false
 
-    public HunterTrait(NPC hunter, HunterLoadout HunterLoadout) {
+    public HunterTrait(NPC hunter, HunterLoadout hunterLoadout) {
         super("hunter");
         this.hunter = hunter;
         location = hunter.getEntity().getLocation();
@@ -104,46 +115,25 @@ public class HunterTrait extends Trait {
         placeableBlockFaces.add(BlockFace.EAST);
         placeableBlockFaces.add(BlockFace.WEST);
 
-        this.hunterLoadout = HunterLoadout;
+        this.hunterLoadout = hunterLoadout;
     }
 
-    public void updateTargetOtherWorldLocation(){
-        if (targetsSwitchedWorldsLocation == null){
-            targetsSwitchedWorldsLocation = getTarget().getLocation();
-        }
-    }
-
-    public void setDimensionFollow(int dimensionFollow){
-        if (followThroughDimension == 0){
-            followThroughDimension = dimensionFollow;
-        }
-    }
-
-    public void setTeleportTimer(int teleportTimer){
-        if (teleportTimer == 0){
+    public void setTeleportTimer(int teleportTimer) {
+        if (teleportTimer == 0) {
             this.teleportTimer = 0;
-        }
-        else {
-            if (this.teleportTimer == 0){
+        } else {
+            if (this.teleportTimer == 0) {
                 this.teleportTimer = teleportTimer;
-                if (debug){
+                if (debug) {
                     Bukkit.getLogger().log(Level.WARNING, "Teleport timer set to: " + teleportTimer + " ticks");
                 }
             }
         }
     }
 
-    public void setCurrentlyBreakingABlock(boolean isCurrentlyBreakingABlock) {
-        this.isCurrentlyBreakingABlock = isCurrentlyBreakingABlock;
-    }
-
-    public void setShouldBeStopped(boolean shouldBeStopped){
-        this.shouldBeStopped = shouldBeStopped;
-    }
-
-    public boolean isTargeting(){
-        for (Trait trait : npc.getTraits()){
-            if (trait instanceof HunterFollow){
+    public boolean isTargeting() {
+        for (Trait trait : npc.getTraits()) {
+            if (trait instanceof HunterFollow) {
                 HunterFollow followTrait = (HunterFollow) trait;
                 return followTrait.isEnabled();
             }
@@ -153,17 +143,16 @@ public class HunterTrait extends Trait {
 
     int blockBreakTimeout = 0;
 
-
     @Override
     public void run() {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!delete){
+                if (!DELETE) {
                     try {
                         if (npc.isSpawned()) {
-                            if (needsArmorUpdate){
-                                if (debug){
+                            if (needsArmorUpdate) {
+                                if (debug) {
                                     Bukkit.getLogger().log(Level.INFO, "NPC requested an armor update!");
                                 }
                                 updateArmor();
@@ -171,52 +160,55 @@ public class HunterTrait extends Trait {
                             }
                             checkForNewTarget();
                             cooldownsDecrement();
-                            if (isInWater){
-                                if (!getLivingEntity().isSwimming()){
-                                    if (debug){
+                            if (isInWater) {
+                                if (!getLivingEntity().isSwimming()) {
+                                    if (debug) {
                                         Bukkit.getLogger().log(Level.INFO, "NPC was set to swim!");
                                     }
                                     ((Player) getLivingEntity()).setSprinting(true);
                                     getLivingEntity().setSwimming(true);
                                 }
-                                if (!isFullSwimming){
-                                    if (getLivingEntity().getLocation().clone().add(0,1,0).getBlock().isLiquid()){
-                                        if (debug){
+                                if (!isFullSwimming) {
+                                    if (getLivingEntity().getLocation().clone().add(0, 1, 0).getBlock().isLiquid()) {
+                                        if (debug) {
                                             Bukkit.getLogger().log(Level.INFO, "NPC was set to fully swim!");
                                         }
                                         getLivingEntity().setGliding(true);
                                         isFullSwimming = true;
                                     }
-                                }
-                                else {
-                                    if (!getLivingEntity().getLocation().clone().add(0,1,0).getBlock().isLiquid()){
-                                        if (debug){
+                                } else {
+                                    if (!getLivingEntity().getLocation().clone().add(0, 1, 0).getBlock().isLiquid()) {
+                                        if (debug) {
                                             Bukkit.getLogger().log(Level.INFO, "NPC was set to stop swimming!");
                                         }
                                         isFullSwimming = false;
                                         getLivingEntity().setGliding(false);
                                     }
                                 }
-                            }
-                            else {
+                            } else {
                                 isFullSwimming = false;
                                 getLivingEntity().setSwimming(false);
                                 ((Player) getLivingEntity()).setSprinting(false);
                             }
                             if (!shouldBeStopped) {
-                                if (blockPlaceCooldown == 0){
+                                if (blockPlaceCooldown == 0) {
                                     if (distanceToGround(4) && !isInWater) {
                                         placeBlockUnderFeet(hunterLoadout.getBlockMaterial());
                                     }
-                                    if (getLivingEntity().getLocation().clone().subtract(0,1,0).getBlock().getType().equals(Material.WATER) && !isFullSwimming){
+                                    if (getLivingEntity().getLocation()
+                                                         .clone()
+                                                         .subtract(0, 1, 0)
+                                                         .getBlock()
+                                                         .getType()
+                                                         .equals(Material.WATER) && !isFullSwimming) {
                                         placeBlockUnderFeet(hunterLoadout.getBlockMaterial());
                                     }
                                 }
-                                if (getLivingEntity().getLocation().clone().subtract(0,1,0).getBlock().getType().equals(Material.LAVA)){
-                                    if (boatClutchCooldown == 0){
+                                if (getLivingEntity().getLocation().clone().subtract(0, 1, 0).getBlock().getType().equals(Material.LAVA)) {
+                                    if (boatClutchCooldown == 0) {
                                         setMainHandItem(new ItemStack(Material.OAK_BOAT));
                                         PlayerAnimation.ARM_SWING.play((Player) getLivingEntity());
-                                        getLivingEntity().getWorld().spawnEntity(getLivingEntity().getLocation().clone().subtract(0,0.9,0), EntityType.BOAT);
+                                        getLivingEntity().getWorld().spawnEntity(getLivingEntity().getLocation().clone().subtract(0, 0.9, 0), EntityType.BOAT);
                                         tryJump(0.7, true);
                                         boatClutchCooldown = 10;
                                         lookDown();
@@ -226,13 +218,15 @@ public class HunterTrait extends Trait {
                             if (!scheduledBrokenBlocks.isEmpty()) {
                                 shouldJump = false;
                             }
-                            if (getTarget() != null && getLivingEntity() != null && getTarget().getWorld().getUID().equals(getLivingEntity().getWorld().getUID())) {
+                            if (getTarget() != null && getLivingEntity() != null && getTarget().getWorld()
+                                                                                               .getUID()
+                                                                                               .equals(getLivingEntity().getWorld().getUID())) {
                                 if (isCurrentlyDiggingDownwards) {
                                     if (getLivingEntity().isOnGround()) {
                                         if (!getLivingEntity().getLocation().clone().subtract(0, 1, 0).getBlock().getType().isAir()) {
                                             centerOnBlock();
                                             if (!scheduledBrokenBlocks.contains(getLivingEntity().getLocation().clone().subtract(0, 1, 0).getBlock())) {
-                                                if (debug){
+                                                if (debug) {
                                                     Bukkit.getLogger().log(Level.INFO, "Added block underneath me to queued blocks. (Dig downwards)");
                                                 }
                                                 scheduledBrokenBlocks.add(getLivingEntity().getLocation().clone().subtract(0, 1, 0).getBlock());
@@ -254,14 +248,14 @@ public class HunterTrait extends Trait {
                                         }
                                         if (getLivingEntity().isOnGround()) {
                                             if (aboveHeadIsAir()) {
-                                                if (debug){
+                                                if (debug) {
                                                     Bukkit.getLogger().log(Level.INFO, "Placed block underneath to go upwards.");
                                                 }
-                                                getLivingEntity().teleport(getLivingEntity().getLocation().clone().add(0,1,0));
+                                                getLivingEntity().teleport(getLivingEntity().getLocation().clone().add(0, 1, 0));
                                                 lookDown();
                                                 placeBlockUnderFeet(hunterLoadout.getBlockMaterial());
                                             } else {
-                                                if (debug){
+                                                if (debug) {
                                                     Bukkit.getLogger().log(Level.INFO, "Breaking Block above head.");
                                                 }
                                                 isBreakingWhileUpwards = true;
@@ -272,8 +266,7 @@ public class HunterTrait extends Trait {
                                         }
                                         blockPlaceCooldown = 10;
                                     }
-                                }
-                                else {
+                                } else {
                                     if (!isTargeting()) {
                                         enableMovement();
                                     }
@@ -286,7 +279,7 @@ public class HunterTrait extends Trait {
                                             break;
                                         }
                                         if (chosenBrokenBlock != null && !chosenBrokenBlock.isEmpty()) {
-                                            if (debug){
+                                            if (debug) {
                                                 Bukkit.getLogger().log(Level.INFO, "Selected a block to break.");
                                             }
                                             blockCurrentlyBeingBroken = chosenBrokenBlock;
@@ -313,7 +306,7 @@ public class HunterTrait extends Trait {
                                         }
                                     }
                                 }
-                                if (!isCurrentlyBreakingABlock && !isCurrentlyPlacingUpwards && !isCurrentlyDiggingDownwards && !isBreakingWhileUpwards){
+                                if (!isCurrentlyBreakingABlock && !isCurrentlyPlacingUpwards && !isCurrentlyDiggingDownwards && !isBreakingWhileUpwards) {
                                     shouldJump = true;
                                 }
                                 update();
@@ -322,19 +315,17 @@ public class HunterTrait extends Trait {
                                     tryJump(0.5, false);
                                 }
                             }
-                        }
-                        else {
-                            if (respawnTimer == 0){
-                                if (debug){
+                        } else {
+                            if (respawnTimer == 0) {
+                                if (debug) {
                                     Bukkit.getLogger().log(Level.INFO, "Respawn timer set to 30 seconds.");
                                 }
-                                respawnTimer = 30*20;
-                            }
-                            else {
+                                respawnTimer = 30 * 20;
+                            } else {
                                 respawnTimer--;
                                 if (respawnTimer == 0) {
-                                    if (debug){
-                                        Bukkit.getLogger().log(Level.WARNING, "NPC spawned at: "+location.toString());
+                                    if (debug) {
+                                        Bukkit.getLogger().log(Level.WARNING, "NPC spawned at: " + location.toString());
                                     }
                                     npc.spawn(getRandomLocation(getTarget().getLocation(), 10, 20));
                                     npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
@@ -346,8 +337,7 @@ public class HunterTrait extends Trait {
                     } catch (NullPointerException exception) {
                         // Ignore
                     }
-                }
-                else {
+                } else {
                     cancel();
                 }
             }
@@ -355,40 +345,60 @@ public class HunterTrait extends Trait {
         super.run();
     }
 
-    public void getProperToolToBreakBlock(Block chosenBrokenBlock){
-        if (chosenBrokenBlock.getType().equals(Material.DIRT) || chosenBrokenBlock.getType().equals(Material.GRASS_BLOCK) || chosenBrokenBlock.getType().equals(Material.GRAVEL) || chosenBrokenBlock.getType().equals(Material.SAND) || chosenBrokenBlock.getType().equals(Material.SOUL_SAND) || chosenBrokenBlock.getType().equals(Material.SOUL_SOIL) ) {
+    public void getProperToolToBreakBlock(Block chosenBrokenBlock) {
+        if (chosenBrokenBlock.getType().equals(Material.DIRT) || chosenBrokenBlock.getType().equals(Material.GRASS_BLOCK) || chosenBrokenBlock.getType()
+                                                                                                                                              .equals(
+                                                                                                                                                Material.GRAVEL) || chosenBrokenBlock
+                                                                                                                                                                      .getType()
+                                                                                                                                                                      .equals(
+                                                                                                                                                                        Material.SAND) || chosenBrokenBlock
+                                                                                                                                                                                            .getType()
+                                                                                                                                                                                            .equals(
+                                                                                                                                                                                              Material.SOUL_SAND) || chosenBrokenBlock
+                                                                                                                                                                                                                       .getType()
+                                                                                                                                                                                                                       .equals(
+                                                                                                                                                                                                                         Material.SOUL_SOIL)) {
             setMainHandItem(new ItemStack(Material.DIAMOND_SHOVEL));
-        } else if (chosenBrokenBlock.getType().toString().toLowerCase().contains("leaves") || chosenBrokenBlock.getType().toString().toLowerCase().contains("wart")) {
+        } else if (chosenBrokenBlock.getType().toString().toLowerCase().contains("leaves") || chosenBrokenBlock.getType()
+                                                                                                               .toString()
+                                                                                                               .toLowerCase()
+                                                                                                               .contains("wart")) {
             setMainHandItem(new ItemStack(Material.SHEARS));
-        } else if (chosenBrokenBlock.getType().toString().toLowerCase().contains("log") || chosenBrokenBlock.getType().toString().toLowerCase().contains("plank") || chosenBrokenBlock.getType().toString().toLowerCase().contains("stem")) {
+        } else if (chosenBrokenBlock.getType().toString().toLowerCase().contains("log") || chosenBrokenBlock.getType()
+                                                                                                            .toString()
+                                                                                                            .toLowerCase()
+                                                                                                            .contains("plank") || chosenBrokenBlock.getType()
+                                                                                                                                                   .toString()
+                                                                                                                                                   .toLowerCase()
+                                                                                                                                                   .contains(
+                                                                                                                                                     "stem")) {
             setMainHandItem(new ItemStack(Material.DIAMOND_AXE));
         } else {
             setMainHandItem(new ItemStack(Material.DIAMOND_PICKAXE));
         }
     }
 
-    public void teleportToAvailableSlot(){
-        if (!teleportedRecently){
+    public void teleportToAvailableSlot() {
+        if (!teleportedRecently) {
             Location location = getRandomLocation(getTarget().getLocation(), 10, 20);
             int checks = 0;
-            while (!locationIsTeleportable(location) && checks != 100 && locationIsVisible(getTarget(), location)){
+            while (!locationIsTeleportable(location) && checks != 100 && locationIsVisible(getTarget(), location)) {
                 location = getRandomLocation(getTarget().getLocation(), 15, 20);
                 checks++;
             }
 
-            if (!locationIsVisible(getTarget(), location)){
+            if (!locationIsVisible(getTarget(), location)) {
                 isCurrentlyBreakingABlock = false;
                 isCurrentlyDiggingDownwards = false;
                 isCurrentlyPlacingUpwards = false;
                 enableMovement();
                 getLivingEntity().teleport(location);
-                if (debug){
-                    Bukkit.getLogger().log(Level.WARNING, "NPC teleported to: "+location.toString());
+                if (debug) {
+                    Bukkit.getLogger().log(Level.WARNING, "NPC teleported to: " + location.toString());
                 }
-            }
-            else {
-                setTeleportTimer((random.nextInt(10))*20);
-                if (debug){
+            } else {
+                setTeleportTimer((random.nextInt(10)) * 20);
+                if (debug) {
                     Bukkit.getLogger().log(Level.SEVERE, "NPC couldnt teleport to spot. Reverted back to timer.");
                 }
             }
@@ -403,54 +413,58 @@ public class HunterTrait extends Trait {
     }
 
     private boolean locationIsTeleportable(Location location) {
-        if (location.clone().subtract(0, 1, 0).getBlock().getType().isSolid() && !location.clone().subtract(0, 1, 0).getBlock().isLiquid() && location.getBlock().getType().isAir()) {
+        if (location.clone().subtract(0, 1, 0).getBlock().getType().isSolid() && !location.clone()
+                                                                                          .subtract(0, 1, 0)
+                                                                                          .getBlock()
+                                                                                          .isLiquid() && location.getBlock().getType().isAir()) {
             return location.clone().add(0, 1, 0).getBlock().getType().isAir();
         }
         return false;
     }
 
-    private Location getRandomLocation(Location location, int min, int max){
-        int randomX = random.nextInt(max-min)+min;
-        int randomZ = random.nextInt(max-min)+min;
+    private Location getRandomLocation(Location location, int min, int max) {
+        int randomX = random.nextInt(max - min) + min;
+        int randomZ = random.nextInt(max - min) + min;
 
-        if (random.nextBoolean()){
+        if (random.nextBoolean()) {
             randomX *= -1;
         }
-        if (random.nextBoolean()){
+        if (random.nextBoolean()) {
             randomZ *= -1;
         }
 
         Location clone = location.clone();
-        clone.setX(clone.getX()+randomX);
-        clone.setZ(clone.getZ()+randomZ);
+        clone.setX(clone.getX() + randomX);
+        clone.setZ(clone.getZ() + randomZ);
 
-        clone.setY(clone.getY()+20);
+        clone.setY(clone.getY() + 20);
 
         int checksUpwards = 0;
-        while (clone.getBlock().getRelative(BlockFace.DOWN).getType().isAir() && checksUpwards != 40){
-            clone.subtract(0,1,0);
+        while (clone.getBlock().getRelative(BlockFace.DOWN).getType().isAir() && checksUpwards != 40) {
+            clone.subtract(0, 1, 0);
             checksUpwards++;
         }
 
-        while (!clone.getBlock().isEmpty()){
-            clone.add(0,1,0);
+        while (!clone.getBlock().isEmpty()) {
+            clone.add(0, 1, 0);
         }
         return clone;
     }
 
-    boolean locationIsVisible(Player player,Location location) {
+    private boolean locationIsVisible(Player player, Location location) {
         Vector facingNormal = player.getLocation().getDirection().normalize();
         Vector playerEntityVecNormal = player.getEyeLocation().toVector().subtract(location.toVector()).normalize();
         return playerEntityVecNormal.dot(facingNormal) < 0;
     }
 
-    private boolean distanceToGround(int distance){
+    private boolean distanceToGround(int distance) {
         Location location = getLivingEntity().getLocation().clone();
-        Block testBlock = location.getBlock();
+        location.getBlock();
+        Block testBlock;
         boolean isAirAllTheWay = true;
-        for (int i = 0; i < distance; i++){
-            testBlock = location.clone().subtract(0,i,0).getBlock();
-            if (testBlock.getType().isSolid() || testBlock.isLiquid()){
+        for (int i = 0; i < distance; i++) {
+            testBlock = location.clone().subtract(0, i, 0).getBlock();
+            if (testBlock.getType().isSolid() || testBlock.isLiquid()) {
                 isAirAllTheWay = false;
                 break;
             }
@@ -458,32 +472,32 @@ public class HunterTrait extends Trait {
         return isAirAllTheWay;
     }
 
-    private boolean aboveHeadIsAir(){
-        return getLivingEntity().getLocation().clone().add(0,2,0).getBlock().isEmpty();
+    private boolean aboveHeadIsAir() {
+        return getLivingEntity().getLocation().clone().add(0, 2, 0).getBlock().isEmpty();
     }
 
-    private void placeBlockUnderFeet(Material material){
+    private void placeBlockUnderFeet(Material material) {
         blockBreakTimeout = 0;
         shouldBeStopped = false;
         setMainHandItem(new ItemStack(material));
-        if (canPlaceBlock(getLivingEntity().getLocation().clone().subtract(0,1,0))){
+        if (canPlaceBlock(getLivingEntity().getLocation().clone().subtract(0, 1, 0))) {
             lookDown();
             PlayerAnimation.ARM_SWING.play((Player) getLivingEntity());
-            getLivingEntity().getLocation().clone().subtract(0,1,0).getBlock().setType(material);
-            getLivingEntity().getWorld().playSound(getLivingEntity().getLocation().clone().subtract(0,1,0), Sound.BLOCK_STONE_PLACE, 1, 1);
+            getLivingEntity().getLocation().clone().subtract(0, 1, 0).getBlock().setType(material);
+            getLivingEntity().getWorld().playSound(getLivingEntity().getLocation().clone().subtract(0, 1, 0), Sound.BLOCK_STONE_PLACE, 1, 1);
             blockPlaceCooldown = 10;
         }
     }
 
-    private void lookDown(){
+    private void lookDown() {
         Util.assumePose(getLivingEntity(), getLivingEntity().getLocation().getYaw(), 90);
     }
 
-    private boolean canPlaceBlock(Location location){
-        if (location.distance(getLivingEntity().getLocation()) <= 5){
-            if (location.getBlock().getType().isAir() || !location.getBlock().getType().isSolid() || location.getBlock().isLiquid()){
-                for (BlockFace blockFace : placeableBlockFaces){
-                    if (location.getBlock().getRelative(blockFace).getType().isSolid() && !location.getBlock().getRelative(blockFace).isLiquid()){
+    private boolean canPlaceBlock(Location location) {
+        if (location.distance(getLivingEntity().getLocation()) <= 5) {
+            if (location.getBlock().getType().isAir() || !location.getBlock().getType().isSolid() || location.getBlock().isLiquid()) {
+                for (BlockFace blockFace : placeableBlockFaces) {
+                    if (location.getBlock().getRelative(blockFace).getType().isSolid() && !location.getBlock().getRelative(blockFace).isLiquid()) {
                         return true;
                     }
                 }
@@ -492,12 +506,12 @@ public class HunterTrait extends Trait {
         return false;
     }
 
-    private void breakBlock(Location location){
+    private void breakBlock(Location location) {
         BlockBreaker.BlockBreakerConfiguration config = new BlockBreaker.BlockBreakerConfiguration();
         config.item(((Player) getLivingEntity()).getInventory().getItemInMainHand());
         config.radius(3);
 
-        if (!location.getBlock().getType().isAir()){
+        if (!location.getBlock().getType().isAir()) {
             BlockBreaker breaker = npc.getBlockBreaker(location.getBlock(), config);
             if (breaker.shouldExecute()) {
                 TaskRunnable run = new TaskRunnable(breaker, this, location);
@@ -506,18 +520,17 @@ public class HunterTrait extends Trait {
         }
     }
 
-    private double getTargetYDifference(){
+    private double getTargetYDifference() {
         return getTarget().getLocation().getY() - getLivingEntity().getLocation().getY();
-    }
-
-    public Block getBlockCurrentlyBeingBroken() {
-        return blockCurrentlyBeingBroken;
     }
 
     private static class TaskRunnable implements Runnable {
         private int taskId;
+
         private final BlockBreaker breaker;
+
         private final HunterTrait HunterTrait;
+
         private final Location location;
 
         public TaskRunnable(BlockBreaker breaker, HunterTrait HunterTrait, Location location) {
@@ -528,137 +541,131 @@ public class HunterTrait extends Trait {
 
         @Override
         public void run() {
-            if (HunterTrait.isCurrentlyBreakingABlock || HunterTrait.isBreakingWhileUpwards){
+            if (HunterTrait.isCurrentlyBreakingABlock || HunterTrait.isBreakingWhileUpwards) {
                 if (breaker.run() != BehaviorStatus.RUNNING) {
                     Bukkit.getScheduler().cancelTask(taskId);
                     breaker.reset();
                     location.getWorld().playSound(location, Sound.BLOCK_STONE_BREAK, 1, 1);
-                    if (HunterTrait.isCurrentlyBreakingABlock){
+                    if (HunterTrait.isCurrentlyBreakingABlock) {
                         HunterTrait.cancelBlockBreaking();
                     }
-                    if (HunterTrait.isBreakingWhileUpwards){
+                    if (HunterTrait.isBreakingWhileUpwards) {
                         HunterTrait.isBreakingWhileUpwards = false;
                     }
 
-                }
-                else {
+                } else {
                     HunterTrait.disableMovement();
                 }
-            }
-            else {
+            } else {
                 Bukkit.getScheduler().cancelTask(taskId);
             }
         }
     }
 
-    private void setNewTarget(Player player){
-        for (Trait trait : npc.getTraits()){
-            if (trait instanceof HunterFollow){
+    private void setNewTarget(Player player) {
+        for (Trait trait : npc.getTraits()) {
+            if (trait instanceof HunterFollow) {
                 HunterFollow followTrait = (HunterFollow) trait;
                 followTrait.toggle(player, false);
             }
         }
     }
 
-    private void update(){
+    private void update() {
         isInWater = getLivingEntity().getLocation().getBlock().getType().equals(Material.WATER);
-        if (activeTarget != null){
+        if (activeTarget != null) {
             Player player = Bukkit.getPlayer(activeTarget);
-            if (!shouldBeStopped){
+            if (!shouldBeStopped) {
                 attemptAttack(player);
             }
             hasLineOfSight = canSee(getTarget());
-            if (isCurrentlyBreakingABlock && blockCurrentlyBeingBroken != null){
-                if (isFarFromChosenBlock()){
+            if (isCurrentlyBreakingABlock && blockCurrentlyBeingBroken != null) {
+                if (isFarFromChosenBlock()) {
                     cancelBlockBreaking();
                 }
             }
         }
     }
 
-    private boolean isFarFromChosenBlock(){
+    private boolean isFarFromChosenBlock() {
         return !withinMargin(blockCurrentlyBeingBroken.getLocation(), getLivingEntity().getLocation(), 3) || blockCurrentlyBeingBroken.getType().isAir();
     }
 
-    private void updateArmor(){
+    private void updateArmor() {
         Equipment equipment = npc.getOrAddTrait(Equipment.class);
         List<Double> heartAdditions = new LinkedList<>();
-        if (hunterLoadout.getHelmetMaterial() != null){
+        if (hunterLoadout.getHelmetMaterial() != null) {
             equipment.set(Equipment.EquipmentSlot.HELMET, new ItemStack(hunterLoadout.getHelmetMaterial()));
             heartAdditions.add(((20 * ArmorItemValues.valueOf(hunterLoadout.getHelmetMaterial().toString()).getHealthMultiplier()) - 20));
         }
-        if (hunterLoadout.getChestplateMaterial() != null){
+        if (hunterLoadout.getChestplateMaterial() != null) {
             equipment.set(Equipment.EquipmentSlot.CHESTPLATE, new ItemStack(hunterLoadout.getChestplateMaterial()));
-            heartAdditions.add(((20*ArmorItemValues.valueOf(hunterLoadout.getChestplateMaterial().toString()).getHealthMultiplier()) - 20));
+            heartAdditions.add(((20 * ArmorItemValues.valueOf(hunterLoadout.getChestplateMaterial().toString()).getHealthMultiplier()) - 20));
         }
-        if (hunterLoadout.getLeggingsMaterial() != null){
+        if (hunterLoadout.getLeggingsMaterial() != null) {
             equipment.set(Equipment.EquipmentSlot.LEGGINGS, new ItemStack(hunterLoadout.getLeggingsMaterial()));
-            heartAdditions.add(((20*ArmorItemValues.valueOf(hunterLoadout.getLeggingsMaterial().toString()).getHealthMultiplier()) - 20));
+            heartAdditions.add(((20 * ArmorItemValues.valueOf(hunterLoadout.getLeggingsMaterial().toString()).getHealthMultiplier()) - 20));
         }
-        if (hunterLoadout.getBootsMaterial() != null){
+        if (hunterLoadout.getBootsMaterial() != null) {
             equipment.set(Equipment.EquipmentSlot.BOOTS, new ItemStack(hunterLoadout.getBootsMaterial()));
-            heartAdditions.add(((20*ArmorItemValues.valueOf(hunterLoadout.getBootsMaterial().toString()).getHealthMultiplier()) - 20));
+            heartAdditions.add(((20 * ArmorItemValues.valueOf(hunterLoadout.getBootsMaterial().toString()).getHealthMultiplier()) - 20));
         }
 
         double total = 0;
 
-        for (Double doubles : heartAdditions){
+        for (Double doubles : heartAdditions) {
             total += doubles;
         }
 
         getLivingEntity().getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20 + total);
     }
 
-    private double getAttackRangeAddition(){
-        if (hunterLoadout.getSwordMaterial() == null){
+    private double getAttackRangeAddition() {
+        if (hunterLoadout.getSwordMaterial() == null) {
             return 0.5;
-        }
-        else {
+        } else {
             return 0;
         }
     }
 
-    private boolean attemptAttack(Player player){
+    private boolean attemptAttack(Player player) {
         Location targetLocation = player.getLocation();
         double attackRange = 2.5;
         double rangeAddition = getAttackRangeAddition();
-        if (getLivingEntity().getLocation().distance(targetLocation) <= (attackRange+rangeAddition)){
-            if (attackCooldown == 0){
-                if (!shouldBeStopped){
+        if (getLivingEntity().getLocation().distance(targetLocation) <= (attackRange + rangeAddition)) {
+            if (attackCooldown == 0) {
+                if (!shouldBeStopped) {
                     Util.faceLocation(npc.getEntity(), player.getLocation());
                     Block block = getBlockInFront(1).getBlock();
-                    if (block.isEmpty()){
-                        if (debug){
+                    if (block.isEmpty()) {
+                        if (debug) {
                             Bukkit.getLogger().log(Level.INFO, "NPC is attacking.");
                         }
                         double health = player.getHealth();
                         double attackDamage;
                         int cooldown;
-                        if (hunterLoadout.getSwordMaterial() != null){
+                        if (hunterLoadout.getSwordMaterial() != null) {
                             setMainHandItem(new ItemStack(hunterLoadout.getSwordMaterial()));
                             AttackItemValues attackItemValues = AttackItemValues.valueOf(hunterLoadout.getSwordMaterial().toString());
                             attackDamage = attackItemValues.getDamage();
                             cooldown = attackItemValues.getCooldown();
-                        }
-                        else {
+                        } else {
                             setMainHandItem(null);
                             attackDamage = AttackItemValues.FIST.getDamage();
                             cooldown = AttackItemValues.FIST.getCooldown();
                         }
 
-
                         player.damage(attackDamage, getLivingEntity());
                         double newHealth = player.getHealth();
-                        if (newHealth < health){
+                        if (newHealth < health) {
                             player.setVelocity(player.getVelocity().add(getLivingEntity().getLocation().getDirection().multiply(0.3)));
                         }
                         PlayerAnimation.ARM_SWING.play((Player) getLivingEntity());
                         scheduledBrokenBlocks.clear();
                         attackCooldown = cooldown;
                         return true;
-                    }
-                    else {
-                        if (debug){
+                    } else {
+                        if (debug) {
                             Bukkit.getLogger().log(Level.INFO, "Added block underneath me to queued blocks. (Block in way while attacking)");
                         }
                         scheduledBrokenBlocks.add(block);
@@ -669,58 +676,59 @@ public class HunterTrait extends Trait {
         return false;
     }
 
-    private void cancelBlockBreaking(){
+    private void cancelBlockBreaking() {
         isCurrentlyBreakingABlock = false;
         scheduledBrokenBlocks.remove(blockCurrentlyBeingBroken);
         blockCurrentlyBeingBroken = null;
         enableMovement();
     }
 
-    private Location getBlockInFront(int length){
+    private Location getBlockInFront(int length) {
         Location eye = getLivingEntity().getEyeLocation();
         Vector vector = eye.getDirection();
 
         return eye.clone().add(vector.multiply(length));
     }
 
-    private void setMainHandItem(ItemStack item){
+    private void setMainHandItem(ItemStack item) {
         ((Player) getLivingEntity()).getInventory().setItemInMainHand(item);
     }
 
-    private void cooldownsDecrement(){
-        if (attackCooldown > 0){
+    private void cooldownsDecrement() {
+        if (attackCooldown > 0) {
             attackCooldown--;
         }
-        if (jumpCooldown > 0){
+        if (jumpCooldown > 0) {
             jumpCooldown--;
         }
-        if (blockPlaceCooldown > 0){
+        if (blockPlaceCooldown > 0) {
             blockPlaceCooldown--;
         }
-        if (targetSearchTimer > 0){
+        if (targetSearchTimer > 0) {
             targetSearchTimer--;
         }
-        if (boatClutchCooldown > 0){
+        if (boatClutchCooldown > 0) {
             boatClutchCooldown--;
         }
-        if (followThroughDimension > 0){
+        if (followThroughDimension > 0) {
             followThroughDimension--;
-            if (followThroughDimension == 0){
-                if (getTarget().getWorld().getUID() != getLivingEntity().getWorld().getUID()){
+            if (followThroughDimension == 0) {
+                if (getTarget().getWorld().getUID() != getLivingEntity().getWorld().getUID()) {
                     getLivingEntity().teleport(targetsSwitchedWorldsLocation);
-                    if (debug){
+                    if (debug) {
                         Bukkit.getLogger().log(Level.INFO, "Travelling after target through dimension.");
                     }
                 }
                 targetsSwitchedWorldsLocation = null;
             }
         }
-        if (teleportTimer > 0){
+        if (teleportTimer > 0) {
             teleportTimer--;
-            if (teleportTimer == 0){
-                if (!locationIsVisible(getTarget(), getLivingEntity().getLocation()) || !withinMargin(getLivingEntity().getLocation(), getTarget().getLocation(), 60)){
+            if (teleportTimer == 0) {
+                if (!locationIsVisible(getTarget(), getLivingEntity().getLocation()) || !withinMargin(getLivingEntity().getLocation(),
+                                                                                                      getTarget().getLocation(), 60)) {
                     teleportToAvailableSlot();
-                    if (debug){
+                    if (debug) {
                         Bukkit.getLogger().log(Level.WARNING, "NPC is requesting teleport.");
                     }
                 }
@@ -728,52 +736,51 @@ public class HunterTrait extends Trait {
         }
     }
 
-    private void checkForLocationUpdate(){
-        if (!updatedThisTick){
+    private void checkForLocationUpdate() {
+        if (!updatedThisTick) {
             location = getLivingEntity().getLocation().clone();
             updatedThisTick = true;
-        }
-        else {
-            if (withinMargin(location, getLivingEntity().getLocation(), 0.05) && !isInWater){
-                if (!isStuck){
-                    if (debug){
+        } else {
+            if (withinMargin(location, getLivingEntity().getLocation(), 0.05) && !isInWater) {
+                if (!isStuck) {
+                    if (debug) {
                         Bukkit.getLogger().log(Level.INFO, "Im stuck!");
                     }
                 }
                 isStuck = true;
-                if (!isCurrentlyPlacingUpwards && !isCurrentlyBreakingABlock && shouldJump && !shouldBeStopped){
-                    if (!getLivingEntity().getLocation().clone().add(0,2,0).getBlock().isEmpty()){
-                        if (debug){
+                if (!isCurrentlyPlacingUpwards && !isCurrentlyBreakingABlock && shouldJump && !shouldBeStopped) {
+                    if (!getLivingEntity().getLocation().clone().add(0, 2, 0).getBlock().isEmpty()) {
+                        if (debug) {
                             Bukkit.getLogger().log(Level.INFO, "Block is above me, breaking.");
                         }
-                        scheduledBrokenBlocks.add(getLivingEntity().getLocation().clone().add(0,2,0).getBlock());
+                        scheduledBrokenBlocks.add(getLivingEntity().getLocation().clone().add(0, 2, 0).getBlock());
                     }
                 }
                 if (!canSee(getTarget()) && !isCurrentlyBreakingABlock && !isCurrentlyPlacingUpwards && !isCurrentlyDiggingDownwards) {
-                    if (debug){
+                    if (debug) {
                         Bukkit.getLogger().log(Level.INFO, "Added block infront of me to queued block breaks. (Mining towards target)");
                     }
-                    if (!getBlockInFront(1).getBlock().isEmpty() && !scheduledBrokenBlocks.contains(getBlockInFront(1).getBlock())){
+                    if (!getBlockInFront(1).getBlock().isEmpty() && !scheduledBrokenBlocks.contains(getBlockInFront(1).getBlock())) {
                         scheduledBrokenBlocks.add(getBlockInFront(1).getBlock());
                     }
-                    if (!getBlockInFront(1).subtract(0, 1, 0).getBlock().isEmpty() && !scheduledBrokenBlocks.contains(getBlockInFront(1).clone().subtract(0, 1, 0).getBlock())){
+                    if (!getBlockInFront(1).subtract(0, 1, 0).getBlock().isEmpty() && !scheduledBrokenBlocks.contains(
+                      getBlockInFront(1).clone().subtract(0, 1, 0).getBlock())) {
                         scheduledBrokenBlocks.add(getBlockInFront(1).clone().subtract(0, 1, 0).getBlock());
                     }
                 }
                 double yDifference = getTargetYDifference();
-                if (!isCurrentlyPlacingUpwards && !isCurrentlyDiggingDownwards && !isCurrentlyBreakingABlock){
-                    if (yDifference >= 2){
-                        if (debug){
+                if (!isCurrentlyPlacingUpwards && !isCurrentlyDiggingDownwards && !isCurrentlyBreakingABlock) {
+                    if (yDifference >= 2) {
+                        if (debug) {
                             Bukkit.getLogger().log(Level.INFO, "Starting to place upwards.");
                         }
                         isCurrentlyPlacingUpwards = true;
                         centerOnBlock();
                     }
-                }
-                else {
-                    if (isCurrentlyPlacingUpwards){
-                        if (yDifference <= 1){
-                            if (debug){
+                } else {
+                    if (isCurrentlyPlacingUpwards) {
+                        if (yDifference <= 1) {
+                            if (debug) {
                                 Bukkit.getLogger().log(Level.INFO, "Stopping placing upwards.");
                             }
                             enableMovement();
@@ -782,20 +789,19 @@ public class HunterTrait extends Trait {
                         }
                     }
                 }
-                if (!isCurrentlyDiggingDownwards && !isCurrentlyPlacingUpwards && !isCurrentlyBreakingABlock){
-                    if (yDifference <= -2){
-                        if (debug){
+                if (!isCurrentlyDiggingDownwards && !isCurrentlyPlacingUpwards && !isCurrentlyBreakingABlock) {
+                    if (yDifference <= -2) {
+                        if (debug) {
                             Bukkit.getLogger().log(Level.INFO, "Starting to dig downwards.");
                         }
                         shouldJump = false;
                         isCurrentlyDiggingDownwards = true;
                         centerOnBlock();
                     }
-                }
-                else {
-                    if (isCurrentlyDiggingDownwards){
-                        if (yDifference >= -1){
-                            if (debug){
+                } else {
+                    if (isCurrentlyDiggingDownwards) {
+                        if (yDifference >= -1) {
+                            if (debug) {
                                 Bukkit.getLogger().log(Level.INFO, "Stopping digging downwards.");
                             }
                             isCurrentlyDiggingDownwards = false;
@@ -804,53 +810,51 @@ public class HunterTrait extends Trait {
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 isStuck = false;
             }
             updatedThisTick = false;
         }
     }
 
-    private void centerOnBlock(){
+    private void centerOnBlock() {
         getLivingEntity().teleport(getLivingEntity().getLocation().getBlock().getLocation().clone().add(0.5, 0, 0.5));
     }
 
     // This is literally just ripped code from Sentinel. Thanks McMonkey
-    private boolean canSee(LivingEntity target){
+    private boolean canSee(LivingEntity target) {
         if (!getLivingEntity().getWorld().equals(target.getWorld())) {
             return false;
         }
-        if (!HunterUtils.isLookingTowards(getLivingEntity().getEyeLocation(), target.getEyeLocation(), 100, 180)){
+        if (!HunterUtils.isLookingTowards(getLivingEntity().getEyeLocation(), target.getEyeLocation(), 100, 180)) {
             return false;
         }
         return getLivingEntity().hasLineOfSight(target);
     }
 
-    private boolean withinMargin(Location firstLocation, Location secondLocation, double margin){
+    private boolean withinMargin(Location firstLocation, Location secondLocation, double margin) {
         Location firstClone = firstLocation.clone();
         Location secondClone = secondLocation.clone();
         firstClone.setY(1000);
         secondClone.setY(1000);
-        if (firstClone.getWorld().getUID().equals(secondClone.getWorld().getUID())){
+        if (firstClone.getWorld().getUID().equals(secondClone.getWorld().getUID())) {
             return firstClone.distance(secondClone) <= margin;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
-    private void enableMovement(){
+    private void enableMovement() {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!isCurrentlyBreakingABlock && !isBreakingWhileUpwards && !isCurrentlyPlacingUpwards && !isCurrentlyDiggingDownwards){
+                if (!isCurrentlyBreakingABlock && !isBreakingWhileUpwards && !isCurrentlyPlacingUpwards && !isCurrentlyDiggingDownwards) {
                     shouldBeStopped = false;
                     shouldJump = true;
-                    for (Trait trait : npc.getTraits()){
-                        if (trait instanceof HunterFollow){
+                    for (Trait trait : npc.getTraits()) {
+                        if (trait instanceof HunterFollow) {
                             HunterFollow followTrait = (HunterFollow) trait;
-                            if (!followTrait.isEnabled()){
+                            if (!followTrait.isEnabled()) {
                                 followTrait.toggle(getTarget(), false);
                             }
                         }
@@ -860,13 +864,13 @@ public class HunterTrait extends Trait {
         }.runTaskLater(AiHunterPlugin.getPluginReference(), 1);
     }
 
-    private void disableMovement(){
+    private void disableMovement() {
         shouldBeStopped = true;
         shouldJump = false;
-        for (Trait trait : npc.getTraits()){
-            if (trait instanceof HunterFollow){
+        for (Trait trait : npc.getTraits()) {
+            if (trait instanceof HunterFollow) {
                 HunterFollow followTrait = (HunterFollow) trait;
-                if (followTrait.isEnabled()){
+                if (followTrait.isEnabled()) {
                     followTrait.toggle(getTarget(), false);
                 }
             }
@@ -874,7 +878,7 @@ public class HunterTrait extends Trait {
     }
 
     private void tryJump(double height, boolean force) {
-        if (jumpCooldown == 0){
+        if (jumpCooldown == 0) {
             if (getLivingEntity().isOnGround() || force) {
                 npc.getNavigator().setTarget(getTarget(), false);
                 getLivingEntity().setVelocity(getLivingEntity().getVelocity().add(new Vector(0, height, 0)));
@@ -887,34 +891,29 @@ public class HunterTrait extends Trait {
         double smallestDistance = 1000;
         UUID closestCandidate = null;
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getWorld().getUID().equals(getLivingEntity().getWorld().getUID()) && !player.getGameMode().equals(GameMode.SPECTATOR)){
+            if (player.getWorld().getUID().equals(getLivingEntity().getWorld().getUID()) && !player.getGameMode().equals(GameMode.SPECTATOR)) {
                 if (getLivingEntity().getLocation().distance(player.getLocation()) < smallestDistance) {
                     closestCandidate = player.getUniqueId();
                     smallestDistance = getLivingEntity().getLocation().distance(player.getLocation());
                 }
             }
         }
-        if (closestCandidate != null){
-            if (activeTarget != closestCandidate){
+        if (closestCandidate != null) {
+            if (activeTarget != closestCandidate) {
                 activeTarget = closestCandidate;
                 setNewTarget(getTarget());
             }
         }
     }
 
-    public Player getTarget(){
+    public Player getTarget() {
         return Bukkit.getPlayer(activeTarget);
     }
 
-    private List<Entity> getNearbyEntities(int range){
-        return hunter.getEntity().getNearbyEntities(range, range, range);
-    }
-
-    public LivingEntity getLivingEntity(){
-        if (npc.getEntity() != null){
+    public LivingEntity getLivingEntity() {
+        if (npc.getEntity() != null) {
             return (LivingEntity) npc.getEntity();
-        }
-        else {
+        } else {
             return null;
         }
     }
