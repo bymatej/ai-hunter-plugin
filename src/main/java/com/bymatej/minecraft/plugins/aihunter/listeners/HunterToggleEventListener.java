@@ -18,6 +18,7 @@ import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginRef
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.OFF;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.createHunter;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.freezeHunter3;
 import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static java.lang.String.format;
 import static java.util.logging.Level.SEVERE;
@@ -56,12 +57,16 @@ public class HunterToggleEventListener implements Listener {
         commandSender.sendMessage(format("You just spawned %s AI %s. RUN!", numberOfHunters,
                                          numberOfHunters > 1 ? "Hunters" : "Hunter"));
         setWeather(commandSender);
-        //aiHunters.forEach(HunterUtils::freezeHunter);
-        // todo: execute command to start hunter
+        freezeHunter3(aiHunters, commandSender);
     }
 
     private void hunterOff(HunterToggleEvent event) {
         Player commandSender = event.getPlayer();
+        aiHunters.forEach(hunter -> {
+            hunter.despawn();
+            hunter.destroy();
+        });
+        aiHunters.clear();
         aiHunters = new LinkedList<>(); // remove all hunters
         //        disarmHunter(aiHunter);
         commandSender.sendMessage("Hunters are disabled. Thank God!");

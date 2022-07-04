@@ -1,5 +1,6 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -14,6 +15,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
@@ -271,20 +273,13 @@ public class HunterUtils {
         entity.sendMessage("You can hunt now!");
     }
 
-    public static void freezeHunter3(NPC npc, Player commandSender) {
-        Entity entity = npc.getEntity();
-        entity.setInvulnerable(false);
+    public static void freezeHunter3(List<NPC> npcs, Player commandSender) {
         FileConfiguration config = getPluginReference().getConfig();
-        boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
-
         Location initialLocation = commandSender.getLocation();
         int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
-        entity.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
-                                  initialLocation.getX(),
-                                  initialLocation.getY(),
-                                  initialLocation.getZ(),
-                                  movementDelay));
-        getPluginReference().getServer().broadcastMessage(format("Hunter will be repeatedly teleported back to to %s/%s/%s for %s seconds.",
+        boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
+
+        getPluginReference().getServer().broadcastMessage(format("Hunters will be repeatedly teleported back to to %s/%s/%s for %s seconds.",
                                                                  initialLocation.getX(),
                                                                  initialLocation.getY(),
                                                                  initialLocation.getZ(),
@@ -301,9 +296,15 @@ public class HunterUtils {
             }
 
             if (sec != lastSec) {
-                // Teleporting
-                entity.setInvulnerable(true);
-                entity.teleport(initialLocation);
+                npcs.forEach(npc -> {
+                    // Get Data
+                    Entity entity = npc.getEntity();
+                    entity.setInvulnerable(false);
+
+                    // Teleporting
+                    entity.setInvulnerable(true);
+                    npc.teleport(initialLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                });
 
                 // Messages
                 long secLeft = 0;
@@ -312,7 +313,6 @@ public class HunterUtils {
                 } else {
                     secLeft = movementDelay - (lastSec - initSec);
                 }
-                entity.sendMessage(format("You need to wait for %s more seconds before you can move.", secLeft));
                 getPluginReference().getServer().broadcastMessage((format("The hunter will start hunting you in %s seconds.", secLeft)));
                 Bukkit.getLogger().log(Level.INFO, "Hunter sleeps for " + secLeft + " more seconds");
                 lastSec = sec;
@@ -323,8 +323,11 @@ public class HunterUtils {
             }
         }
 
-        entity.setInvulnerable(isHunterInvulnerable);
-        entity.sendMessage("You can hunt now!");
+        npcs.forEach(npc -> {
+            Entity entity = npc.getEntity();
+            entity.setInvulnerable(isHunterInvulnerable);
+            entity.sendMessage("You can hunt now!");
+        });
     }
 
     public static boolean isPlayerHunter(Player player) {
@@ -346,11 +349,11 @@ public class HunterUtils {
         npc.spawn(commandSender.getLocation());
         npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
         npc.getNavigator().getLocalParameters()
-           .attackRange(6) // was 10, now is 6
-           .baseSpeed(1.4F)  // was 1.6 now is 1.4
-           .straightLineTargetingDistance(200)  // was 100 now is 200
+           .attackRange(5) // was 10, now is 5
+           .baseSpeed(1.5F)  // was 1.6 now is 1.5
+           .straightLineTargetingDistance(100)
            .stuckAction(new HunterStuckAction())
-           .range(60);  // was 40, now is 60
+           .range(40);
 
         // Arm the hunter
         armHunter(npc);
@@ -374,7 +377,7 @@ public class HunterUtils {
         // Freeze the hunter
         //freezeHunter(npc);//todo
         //freezeHunter2(npc);//todo
-        freezeHunter3(npc, commandSender);//todo
+        //freezeHunter3(npc, commandSender);//todo
     }
 
     public static boolean isLookingTowards(Location myLoc, Location theirLoc, float yawLimit, float pitchLimit) {

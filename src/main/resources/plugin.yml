@@ -14,3 +14,6 @@ commands:
     aliases:
       - hunter
       - ai
+  test:
+    description: test command that runs the test method
+    usage: test

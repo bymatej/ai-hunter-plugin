@@ -1,15 +1,32 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
+import com.bymatej.minecraft.plugins.aihunter.actions.HunterStuckAction;
 import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
+import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
+import com.bymatej.minecraft.plugins.aihunter.loadout.HunterLoadout;
+import com.bymatej.minecraft.plugins.aihunter.traits.HunterFollow;
+import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
+import com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils;
 
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.trait.SkinTrait;
+
+import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
+import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.OFF;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.ON;
 import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static java.lang.Integer.parseInt;
@@ -21,7 +38,11 @@ public class AiHunterCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         try {
-            executeCommand(sender, args);
+            if (command.getName().equalsIgnoreCase("test")) {
+                 executeTestCommand2(sender, args);
+            } else {
+                executeCommand(sender, args);
+            }
             return true;
         } catch (CommandException ex) {
             log(WARNING, "Error executing the command.", ex);
@@ -30,11 +51,50 @@ public class AiHunterCommand implements CommandExecutor {
         return false;
     }
 
+    private void executeTestCommand(CommandSender sender, String[] args) throws CommandException {
+        getPluginReference().getServer().broadcastMessage("Executing test command");
+        Player player = (Player) sender;
+        Location spawnLocation = player.getLocation();
+        spawnLocation.setX(spawnLocation.getX() + 2);
+        spawnLocation.setY(spawnLocation.getY() + 2);
+        spawnLocation.setZ(spawnLocation.getZ() + 2);
+
+        NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "LOLO");
+        npc.spawn(spawnLocation);
+        npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
+        npc.getNavigator().getLocalParameters()
+           .attackRange(5) // was 10, now is 5
+           .baseSpeed(1.5F)  // was 1.6 now is 1.5
+           .straightLineTargetingDistance(100)
+           .stuckAction(new HunterStuckAction())
+           .range(40);
+        HunterFollow followTrait = new HunterFollow();
+        followTrait.linkToNPC(npc);
+        followTrait.run();
+        followTrait.toggle(player, false);
+        npc.addTrait(followTrait);
+        //HunterTrait hunterTrait = new HunterTrait(npc, new HunterLoadout(getPluginReference()));
+        //npc.addTrait(hunterTrait);
+        SkinTrait skinTrait = npc.getOrAddTrait(SkinTrait.class);
+        skinTrait.setSkinName("LOLO");
+        if (npc.isSpawned()) {
+            npc.teleport(spawnLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+        }
+        getPluginReference().getServer().broadcastMessage("Executed test command");
+    }
+
+    private void executeTestCommand2(CommandSender sender, String[] args) throws CommandException {
+        getPluginReference().getServer().broadcastMessage("Executing test command");
+
+        HunterUtils.freezeHunter3(HunterToggleEventListener.aiHunters, (Player) sender);
+
+        getPluginReference().getServer().broadcastMessage("Executed test command");
+    }
+
     private void executeCommand(CommandSender sender, String[] args) throws CommandException {
         log("Command is executing");
 
-        if (sender instanceof Player && sender.hasPermission("terminatornpc.spawnterminator")) { //todo: rename permission
-            validateCommand(sender, args);
+        if (sender instanceof Player && sender.hasPermission("aihunter.spawnhunter")) {
             Player player = (Player) sender;
 
             if (args.length == 0) {
@@ -42,10 +102,16 @@ public class AiHunterCommand implements CommandExecutor {
             }
 
             if (args.length == 1) {
-                turnAiHunterOn(args[0], player);
+                if (StringUtils.isNotBlank(args[0]) && args[0].equalsIgnoreCase("off")) {
+                    turnAiHuntersOff(player);
+                } else {
+                    validateCommand(sender, args);
+                    turnAiHunterOn(args[0], player);
+                }
             }
 
             if (args.length == 2) {
+                validateCommand(sender, args);
                 turnAiHunterOn(args[0], parseInt(args[1]), player);
             }
         } else {
@@ -93,6 +159,15 @@ public class AiHunterCommand implements CommandExecutor {
             log(WARNING, message);
             throw new CommandException(message);
         }
+
+        // AI hunter must not be named On or Off
+        if (aiHunterName.equalsIgnoreCase("on") ||
+            aiHunterName.equalsIgnoreCase("off")) {
+            String message = "You cannot name your hunter \"on\" or \"off\"!";
+            sender.sendMessage(message);
+            log(WARNING, message);
+            throw new CommandException(message);
+        }
     }
 
     private void validateDesiredHunterAmount(CommandSender sender, String desiredNumberOfHunters) {
@@ -114,13 +189,19 @@ public class AiHunterCommand implements CommandExecutor {
         }
     }
 
+    private void turnAiHuntersOff(Player player) {
+        HunterToggleEvent hunterToggleEvent = new HunterToggleEvent(null, 0, OFF, player);
+        getPluginManager().callEvent(hunterToggleEvent);
+        log("Hunters turned off");
+    }
+
     private void turnAiHunterOn(String aiHunterName, Player player) {
         turnAiHunterOn(aiHunterName, 1, player);
     }
 
     private void turnAiHunterOn(String aiHunterName, int numberOfHunters, Player player) {
         if (StringUtils.isBlank(aiHunterName)) {
-            aiHunterName = "CourageTheCowardlyDog";
+            aiHunterName = "Bot Mutant";
         }
 
         HunterToggleEvent hunterToggleEvent = new HunterToggleEvent(aiHunterName, numberOfHunters, ON, player);
