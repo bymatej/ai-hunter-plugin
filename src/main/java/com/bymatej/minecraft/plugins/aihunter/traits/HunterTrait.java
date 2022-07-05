@@ -93,7 +93,7 @@ public class HunterTrait extends Trait {
 
     private int teleportTimer = 0;
 
-    private static final boolean DELETE = false;
+    private boolean delete = false;
 
     private boolean isFullSwimming = false;
 
@@ -101,7 +101,7 @@ public class HunterTrait extends Trait {
 
     private final HunterLoadout hunterLoadout;
 
-    private boolean debug = false; // todo: turn to false
+    private boolean debug = false;
 
     public HunterTrait(NPC hunter, HunterLoadout hunterLoadout) {
         super("hunter");
@@ -116,6 +116,18 @@ public class HunterTrait extends Trait {
         placeableBlockFaces.add(BlockFace.WEST);
 
         this.hunterLoadout = hunterLoadout;
+    }
+
+    public void updateTargetOtherWorldLocation(){
+        if (targetsSwitchedWorldsLocation == null){
+            targetsSwitchedWorldsLocation = getTarget().getLocation();
+        }
+    }
+
+    public void setDimensionFollow(int dimensionFollow){
+        if (followThroughDimension == 0){
+            followThroughDimension = dimensionFollow;
+        }
     }
 
     public void setTeleportTimer(int teleportTimer) {
@@ -148,7 +160,7 @@ public class HunterTrait extends Trait {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!DELETE) {
+                if (!delete) {
                     try {
                         if (npc.isSpawned()) {
                             if (needsArmorUpdate) {
@@ -916,5 +928,9 @@ public class HunterTrait extends Trait {
         } else {
             return null;
         }
+    }
+
+    public void setDelete(boolean delete) {
+        this.delete = delete;
     }
 }

@@ -1,7 +1,5 @@
 package com.bymatej.minecraft.plugins.aihunter.commands;
 
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,10 +13,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 
 import com.bymatej.minecraft.plugins.aihunter.actions.HunterStuckAction;
 import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
-import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
-import com.bymatej.minecraft.plugins.aihunter.loadout.HunterLoadout;
 import com.bymatej.minecraft.plugins.aihunter.traits.HunterFollow;
-import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
 import com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -86,7 +81,7 @@ public class AiHunterCommand implements CommandExecutor {
     private void executeTestCommand2(CommandSender sender, String[] args) throws CommandException {
         getPluginReference().getServer().broadcastMessage("Executing test command");
 
-        HunterUtils.freezeHunter3(HunterToggleEventListener.aiHunters, (Player) sender);
+        HunterUtils.freezeHunters((Player) sender);
 
         getPluginReference().getServer().broadcastMessage("Executed test command");
     }

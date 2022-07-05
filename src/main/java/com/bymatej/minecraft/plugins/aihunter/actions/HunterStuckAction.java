@@ -1,33 +1,34 @@
 package com.bymatej.minecraft.plugins.aihunter.actions;
 
+import java.util.Random;
+
+import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
+
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 
-import java.util.Random;
-
 public class HunterStuckAction implements StuckAction {
 
     Random random = new Random();
 
-
     @Override
-    public boolean run(NPC npc, Navigator navigator) {//todo: finish up this method
+    public boolean run(NPC npc, Navigator navigator) {
         for (Trait trait : npc.getTraits()) {
-//            if (trait instanceof TerminatorTrait) {
-//                TerminatorTrait terminatorTrait = (TerminatorTrait) trait;
-//                if (terminatorTrait.getTarget().getWorld().getUID().equals(terminatorTrait.getLivingEntity().getWorld().getUID())) {
-//                    if (terminatorTrait.getLivingEntity().getLocation().distance(terminatorTrait.getTarget().getLocation()) > 200) {
-//                        terminatorTrait.teleportToAvailableSlot();
-//                    } else {
-//                        terminatorTrait.setTeleportTimer((random.nextInt(30) + 30) * 20);
-//                    }
-//                } else {
-//                    terminatorTrait.updateTargetOtherWorldLocation();
-//                    terminatorTrait.setDimensionFollow(5 * 20);
-//                }
-//            }
+            if (trait instanceof HunterTrait) {
+                HunterTrait hunterTrait = (HunterTrait) trait;
+                if (hunterTrait.getTarget().getWorld().getUID().equals(hunterTrait.getLivingEntity().getWorld().getUID())) {
+                    if (hunterTrait.getLivingEntity().getLocation().distance(hunterTrait.getTarget().getLocation()) > 200) {
+                        hunterTrait.teleportToAvailableSlot();
+                    } else {
+                        hunterTrait.setTeleportTimer((random.nextInt(30) + 30) * 20);
+                    }
+                } else {
+                    hunterTrait.updateTargetOtherWorldLocation();
+                    hunterTrait.setDimensionFollow(5 * 20);
+                }
+            }
         }
         return true;
     }

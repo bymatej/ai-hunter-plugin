@@ -1,11 +1,5 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -21,23 +15,19 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 
 import com.bymatej.minecraft.plugins.aihunter.actions.HunterStuckAction;
-import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
 import com.bymatej.minecraft.plugins.aihunter.loadout.HunterLoadout;
 import com.bymatej.minecraft.plugins.aihunter.traits.HunterFollow;
 import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
 
+import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.npc.CitizensNPC;
 import net.citizensnpcs.trait.SkinTrait;
 
 import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
-import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
-import static java.lang.Thread.sleep;
 import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
-import static java.util.logging.Level.SEVERE;
 import static net.citizensnpcs.api.CitizensAPI.getNPCRegistry;
 import static net.citizensnpcs.npc.EntityControllers.createForType;
 import static org.bukkit.Location.normalizeYaw;
@@ -46,72 +36,7 @@ import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class HunterUtils {
 
-    //    public static HunterData getCurrentHunter() throws HunterException {
-    //        Hunter hunter = getHunter();
-    //        if (hunter != null) {
-    //            return entityToData(hunter);
-    //        }
-    //
-    //        return null;
-    //    }
-
-    public static void removeCurrentHunter() {
-        //        try {
-        //            deleteHunter(getCurrentHunter());
-        //        } catch (HunterException e) {
-        //            log(SEVERE, "There was no hunter found on the server. Nothing was deleted");
-        //        }
-    }
-
-    public static void armHunter(Player hunter) {
-        FileConfiguration config = getPluginReference().getConfig();
-        // General setup
-        hunter.setInvulnerable(config.getBoolean("hunter_armed_invulnerable", false));
-        hunter.setSaturation((float) config.getDouble("hunter_armed_saturation", 10));
-        hunter.setSaturatedRegenRate(config.getInt("hunter_armed_saturation_regen_rate", 1));
-        AttributeInstance maxHealthAttribute = hunter.getAttribute(GENERIC_MAX_HEALTH);
-        requireNonNull(maxHealthAttribute).setBaseValue(config.getDouble("hunter_armed_max_health", 500));
-        hunter.setHealth(config.getDouble("hunter_armed_health", 500));
-        hunter.setFoodLevel(config.getInt("hunter_armed_food_level", 20));
-        // Head
-        PlayerInventory inventory = hunter.getInventory();
-        inventory.setHelmet(new ItemStack(valueOf(config.getString("hunter_helmet", "CARVED_PUMPKIN"))));
-        inventory.setChestplate(new ItemStack(valueOf(config.getString("hunter_chestplate", "IRON_CHESTPLATE"))));
-        inventory.setLeggings(new ItemStack(valueOf(config.getString("hunter_leggings", "IRON_LEGGINGS"))));
-        inventory.setBoots(new ItemStack(valueOf(config.getString("hunter_boots", "GOLDEN_BOOTS"))));
-        // Inventory
-        ItemStack cobblestone = new ItemStack(valueOf(config.getString("hunter_blocks", "COBBLESTONE")));
-        ItemStack cookedBeef = new ItemStack(valueOf(config.getString("hunter_food", "COOKED_BEEF")));
-        cobblestone.setAmount(cobblestone.getMaxStackSize());
-        cookedBeef.setAmount(cookedBeef.getMaxStackSize());
-        inventory.setHeldItemSlot(0);
-        inventory.setItem(0, new ItemStack(valueOf(config.getString("hunter_main_hand_item", "IRON_SWORD"))));
-        inventory.setItem(1, new ItemStack(valueOf(config.getString("hunter_axe", "STONE_AXE"))));
-        inventory.setItem(2, new ItemStack(valueOf(config.getString("hunter_main_pickaxe", "DIAMOND_PICKAXE"))));
-        inventory.setItem(3, new ItemStack(valueOf(config.getString("hunter_shovel", "GOLDEN_SHOVEL"))));
-        inventory.setItem(4, new ItemStack(valueOf(config.getString("hunter_bucket", "WATER_BUCKET"))));
-        inventory.setItem(5, cobblestone);
-        inventory.setItem(6, cobblestone);
-        inventory.setItem(7, cookedBeef);
-        inventory.setItem(8, cookedBeef);
-        for (int i = 9; i <= 17; i++) {
-            inventory.setItem(i, cobblestone);
-        }
-        for (int i = 18; i <= 20; i++) {
-            inventory.setItem(i, new ItemStack(valueOf(config.getString("hunter_main_hand_item", "IRON_SWORD"))));
-        }
-        for (int i = 21; i < 23; i++) {
-            inventory.setItem(i, cookedBeef);
-        }
-        for (int i = 23; i < 25; i++) {
-            inventory.setItem(i, new ItemStack(valueOf(config.getString("hunter_secondary_pickaxe", "IRON_PICKAXE"))));
-        }
-        // Hands
-        inventory.setItemInMainHand(new ItemStack(valueOf(config.getString("hunter_main_hand_item", "IRON_SWORD"))));
-        inventory.setItemInOffHand(new ItemStack(valueOf(config.getString("hunter_off_hand_item", "SHIELD"))));
-        // World
-        hunter.getWorld().setPVP(config.getBoolean("hunter_armed_pvp", true));
-    }
+    private HunterUtils() {}
 
     public static void armHunter(NPC npc) {
         FileConfiguration config = getPluginReference().getConfig();
@@ -164,9 +89,10 @@ public class HunterUtils {
         hunter.getWorld().setPVP(config.getBoolean("hunter_armed_pvp", true));
     }
 
-    public static void disarmHunter(Player hunter) {
+    public static void disarmHunter(NPC npc) {
+        Player hunter = (Player) npc.getEntity();
         FileConfiguration config = getPluginReference().getConfig();
-        // General setup
+        // General setups
         hunter.setInvulnerable(config.getBoolean("hunter_disarmed_invulnerable", false));
         hunter.setSaturation((float) config.getDouble("hunter_disarmed_saturation", 0));
         hunter.setSaturatedRegenRate(config.getInt("hunter_disarmed_saturation_regen_rate", 1));
@@ -180,100 +106,7 @@ public class HunterUtils {
         hunter.getWorld().setPVP(config.getBoolean("hunter_disarmed_pvp", true));
     }
 
-    /**
-     * Possibly the weirdest function I've ever written
-     *
-     * @param npc
-     */
-    public static void freezeHunter(NPC npc) {
-        Entity entity = npc.getEntity();
-        entity.setInvulnerable(false);
-        FileConfiguration config = getPluginReference().getConfig();
-        boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
-
-        // Todo: write more efficient logic that executes a piece of code every X/4 seconds and prints the message every second
-        Location initialLocation = entity.getLocation();
-        int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
-        long start = currentTimeMillis(); // start time is current time
-        long finish = start + (1000L * movementDelay); // end time is start time + time in seconds configured in config.yml multiplied by 1000 to get milliseconds
-        int secondDivider = 4; // quarter
-        int secondControl = 1;
-        entity.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
-                                  initialLocation.getX(),
-                                  initialLocation.getY(),
-                                  initialLocation.getZ(),
-                                  movementDelay));
-        while (currentTimeMillis() < finish) {
-            try {
-                sleep(1000 / secondDivider); // wait quarter of a second
-            } catch (InterruptedException e) {
-                log(SEVERE, "Failed to use Thread.sleep(500);");
-            }
-
-            // Teleporting
-            entity.setInvulnerable(true);
-            entity.teleport(initialLocation);
-
-            // Printing message
-            if (secondControl <= secondDivider + 1) { // +1 because we "used" one quarter, so we need to add it back
-                secondControl++;
-            }
-
-            if (secondControl == secondDivider + 1) {
-                int secLeft = --movementDelay;
-                entity.sendMessage(format("You need to wait for %s more seconds before you can move.", secLeft));
-                getPluginReference().getServer().broadcastMessage((format("You need to wait for %s more seconds before you can move.", secLeft)));
-                secondControl = 1;
-            }
-        }
-
-        entity.setInvulnerable(isHunterInvulnerable);
-        entity.sendMessage("You can hunt now!");
-    }
-
-    public static void freezeHunter2(NPC npc) {
-        Entity entity = npc.getEntity();
-        entity.setInvulnerable(false);
-        FileConfiguration config = getPluginReference().getConfig();
-        boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
-
-        Location initialLocation = entity.getLocation();
-        int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
-        entity.sendMessage(format("You will be teleported back to to %s/%s/%s for %s seconds.",
-                                  initialLocation.getX(),
-                                  initialLocation.getY(),
-                                  initialLocation.getZ(),
-                                  movementDelay));
-
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            int counter = 1;
-
-            @Override
-            public void run() {
-                // Teleporting
-                entity.setInvulnerable(true);
-                entity.teleport(initialLocation);
-
-                // Messages
-                int secLeft = movementDelay;
-                secLeft--;
-                entity.sendMessage(format("You need to wait for %s more seconds before you can move.", secLeft));
-                getPluginReference().getServer().broadcastMessage((format("The hunter will start hunting you in %s seconds.", secLeft)));
-
-                // Flow control for timer
-                counter++;
-                if (counter > movementDelay) {
-                    timer.cancel();
-                }
-            }
-        }, 0L, movementDelay * 1000L);
-
-        entity.setInvulnerable(isHunterInvulnerable);
-        entity.sendMessage("You can hunt now!");
-    }
-
-    public static void freezeHunter3(List<NPC> npcs, Player commandSender) {
+    public static void freezeHunters(Player commandSender) {
         FileConfiguration config = getPluginReference().getConfig();
         Location initialLocation = commandSender.getLocation();
         int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
@@ -296,7 +129,7 @@ public class HunterUtils {
             }
 
             if (sec != lastSec) {
-                npcs.forEach(npc -> {
+                getPluginReference().getAiHunters().forEach(npc -> {
                     // Get Data
                     Entity entity = npc.getEntity();
                     entity.setInvulnerable(false);
@@ -323,24 +156,10 @@ public class HunterUtils {
             }
         }
 
-        npcs.forEach(npc -> {
+        getPluginReference().getAiHunters().forEach(npc -> {
             Entity entity = npc.getEntity();
             entity.setInvulnerable(isHunterInvulnerable);
-            entity.sendMessage("You can hunt now!");
         });
-    }
-
-    public static boolean isPlayerHunter(Player player) {
-        //        try {
-        //            HunterData currentHunter = getCurrentHunter();
-        //            return currentHunter != null &&
-        //                    player != null &&
-        //                    player.getName().equals(currentHunter.getName());
-        //        } catch (HunterException e) {
-        //            log(SEVERE, "Error defining if the player is hunter or not. Assuming it is not.");
-        //            return false;
-        //        }
-        return false;
     }
 
     public static void createHunter(String hunterName, int id, Player commandSender) {//todo: finish up this method and add loadout stuff to the calling method before for loop and pass it on here
@@ -349,11 +168,11 @@ public class HunterUtils {
         npc.spawn(commandSender.getLocation());
         npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
         npc.getNavigator().getLocalParameters()
-           .attackRange(5) // was 10, now is 5
-           .baseSpeed(1.5F)  // was 1.6 now is 1.5
-           .straightLineTargetingDistance(100)
-           .stuckAction(new HunterStuckAction())
-           .range(40);
+           .attackRange(getAttackRange())
+           .baseSpeed(getBaseSpeed())
+           .straightLineTargetingDistance(getStraightLineTargetingDistance())
+           .stuckAction(getStuckAction())
+           .range(getRange());
 
         // Arm the hunter
         armHunter(npc);
@@ -372,12 +191,7 @@ public class HunterUtils {
         SkinTrait skinTrait = npc.getOrAddTrait(SkinTrait.class);
         skinTrait.setSkinName(hunterName);
 
-        HunterToggleEventListener.aiHunters.add(npc);
-
-        // Freeze the hunter
-        //freezeHunter(npc);//todo
-        //freezeHunter2(npc);//todo
-        //freezeHunter3(npc, commandSender);//todo
+        getPluginReference().getAiHunters().add(npc);
     }
 
     public static boolean isLookingTowards(Location myLoc, Location theirLoc, float yawLimit, float pitchLimit) {
@@ -389,6 +203,7 @@ public class HunterUtils {
               Math.abs(yaw + 360 - yawHelp) < yawLimit)) {
             return false;
         }
+
         float pitch = myLoc.getPitch();
         float pitchHelp = getPitch(rel);
         return Math.abs(pitchHelp - pitch) < yawLimit;
@@ -420,6 +235,57 @@ public class HunterUtils {
             yaw = Math.PI;
         }
         return (float) (-yaw * (180.0 / Math.PI));
+    }
+
+    /**
+     * number of blocks when hunter starts to attack
+     * javadoc: https://jd.citizensnpcs.co/net/citizensnpcs/api/ai/NavigatorParameters.html
+     *
+     * @return attack range
+     */
+    private static int getAttackRange() {
+        // todo: make configurable
+        return 3; // default 10
+    }
+
+    /**
+     * entity-dependant, might not make sense to use this at all
+     * Maybe remove this so that the hunter is not faster than player
+     *
+     * @return base speed of an entity
+     */
+    private static float getBaseSpeed() {
+        // todo: make configurable
+        return 1.5F; // default 1.6F
+    }
+
+    /**
+     * number of blocks when AI goes in a straight line to find the player
+     *
+     * @return straight line targeting distance
+     */
+    private static int getStraightLineTargetingDistance() {
+        // todo: make configurable
+        return 100; // default 100
+    }
+
+    /**
+     * if npc gets stuck this happens (for example, teleporting)
+     *
+     * @return stuck action
+     */
+    private static StuckAction getStuckAction() {
+        return new HunterStuckAction();
+    }
+
+    /**
+     * range in blocks for NPC to "see" until it gives up
+     *
+     * @return range
+     */
+    private static int getRange() {
+        // todo: make configurable
+        return 40; // default 40
     }
 
 }

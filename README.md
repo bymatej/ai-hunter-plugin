@@ -37,7 +37,12 @@ So, instead of relying on Baritone/Impact, we could use NPCs. It does not requir
   
  
 # Testing
+Build and deploy locally
 ```
 ./gradlew clean build && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar
 ```
  
+Cleanup, build and deploy locally
+```
+./gradlew clean build && rm -rf ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin/ && rm ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar
+```
