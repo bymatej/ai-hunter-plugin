@@ -45,6 +45,10 @@ public class HunterFollow extends Trait {
         return this.enabled;
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public void onDespawn() {
         this.flock = null;
     }

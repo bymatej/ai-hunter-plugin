@@ -46,3 +46,37 @@ Cleanup, build and deploy locally
 ```
 ./gradlew clean build && rm -rf ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin/ && rm ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar
 ```
+
+
+
+# Possible commands
+CREATE:
+- `aihunter create (creates 1 hunter named Bot Mutant)`
+- `aihunter create Gogo (creates 1 hunter named Gogo)` 
+- `aihunter create Bot 1 (creates 1 hunter named Bot)` 
+- `aihunter create Joe 2 (creates 2 hunters named Joe-1 and Joe-2)`
+
+
+
+REMOVE:
+- `aihunter remove (removes all hunters)`
+- `aihunter remove all (removes all hunters)`
+- `auhunter remove Joe-2 (removes hunter named Joe-2)`
+
+
+LIST/INFO:
+- `aihunter list (lists all hunter names and current locations)`
+- `aihunter list all (lists all hunter names and current locations)`
+- `aihunter info Joe-2 (lists name and current location of a hunter named Joe-2)`
+
+
+PAUSE:
+- `aihunter pause (pauses/freezes all hunters)`
+- `aihunter pause all (pauses/freezes all hunters)`
+- `aihunter pause Joe-2 (pauses the hunter named Joe-2)`
+
+
+RESUME:
+- `aihunter resume (resumes all hunters)`
+- `aihunter resume all (resumes all hunters)`
+- `aihunter resume Joe-2 (resumes the hunter named Joe-2)`

@@ -44,7 +44,6 @@ public final class AiHunterPlugin extends JavaPlugin {
 
     private void registerCommands() {
         requireNonNull(getCommand("aihunter")).setExecutor(new AiHunterCommand());
-        requireNonNull(getCommand("test")).setExecutor(new AiHunterCommand());
     }
 
     private void registerEventListeners() {

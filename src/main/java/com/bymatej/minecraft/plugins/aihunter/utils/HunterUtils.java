@@ -42,6 +42,11 @@ public class HunterUtils {
         FileConfiguration config = getPluginReference().getConfig();
         // General setup
         Player hunter = (Player) npc.getEntity();
+
+        if (hunter == null) {
+            return;
+        }
+
         hunter.setInvulnerable(config.getBoolean("hunter_armed_invulnerable", false));
         hunter.setSaturation((float) config.getDouble("hunter_armed_saturation", 10));
         hunter.setSaturatedRegenRate(config.getInt("hunter_armed_saturation_regen_rate", 1));
@@ -91,6 +96,9 @@ public class HunterUtils {
 
     public static void disarmHunter(NPC npc) {
         Player hunter = (Player) npc.getEntity();
+        if (hunter == null) {
+            return;
+        }
         FileConfiguration config = getPluginReference().getConfig();
         // General setups
         hunter.setInvulnerable(config.getBoolean("hunter_disarmed_invulnerable", false));

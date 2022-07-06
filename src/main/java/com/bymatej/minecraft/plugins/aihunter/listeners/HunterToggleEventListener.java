@@ -1,6 +1,9 @@
 package com.bymatej.minecraft.plugins.aihunter.listeners;
 
+import java.util.Optional;
+
 import org.bukkit.World;
+import org.bukkit.command.CommandException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,6 +11,8 @@ import org.bukkit.event.Listener;
 import com.bymatej.minecraft.plugins.aihunter.events.HunterToggleEvent;
 import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
 import com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus;
+
+import net.citizensnpcs.api.npc.NPC;
 
 import static com.bymatej.minecraft.plugins.aihunter.AiHunterPlugin.getPluginReference;
 import static com.bymatej.minecraft.plugins.aihunter.utils.HunterStatus.OFF;
@@ -18,6 +23,7 @@ import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.freezeHun
 import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static java.lang.String.format;
 import static java.util.logging.Level.SEVERE;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 public class HunterToggleEventListener implements Listener {
 
@@ -35,7 +41,6 @@ public class HunterToggleEventListener implements Listener {
 
     private void hunterOn(HunterToggleEvent event) {
         Player commandSender = event.getPlayer();
-        getPluginReference().getAiHunters().clear(); // remove previous hunters
         int numberOfHunters = event.getNumberOfHunters();
         if (numberOfHunters == 1) {
             getPluginReference().setHunterId((getPluginReference().getHunterId() + 1));
@@ -55,15 +60,35 @@ public class HunterToggleEventListener implements Listener {
 
     private void hunterOff(HunterToggleEvent event) {
         Player commandSender = event.getPlayer();
-        getPluginReference().getAiHunters().forEach(hunter -> {
-            disarmHunter(hunter);
-            HunterTrait hunterTrait = hunter.getOrAddTrait(HunterTrait.class);
-            hunterTrait.setDelete(true);
-            hunter.despawn();
-            hunter.destroy();
-        });
-        getPluginReference().getAiHunters().clear();
-        commandSender.sendMessage("Hunters are disabled. Thank God!");
+        if (isNotBlank(event.getHunterName())) {
+            Optional<NPC> optionalHunter = getPluginReference().getAiHunters().stream()
+                                                               .filter(h -> h.getName().equalsIgnoreCase(event.getHunterName()))
+                                                               .findFirst();
+
+            if (optionalHunter.isPresent()) {
+                NPC hunter = optionalHunter.get();
+                disarmHunter(hunter);
+                HunterTrait hunterTrait = hunter.getOrAddTrait(HunterTrait.class);
+                hunterTrait.setDelete(true);
+                hunter.despawn();
+                hunter.destroy();
+                getPluginReference().getAiHunters().remove(hunter);
+                commandSender.sendMessage("Hunters " + event.getHunterName() + " is disabled!");
+            } else {
+                throw new CommandException("Hunter with name " + event.getHunterName() + " does not exist.");
+            }
+        } else {
+            getPluginReference().getAiHunters().forEach(hunter -> {
+                disarmHunter(hunter);
+                HunterTrait hunterTrait = hunter.getOrAddTrait(HunterTrait.class);
+                hunterTrait.setDelete(true);
+                hunter.despawn();
+                hunter.destroy();
+            });
+            getPluginReference().getAiHunters().clear();
+            commandSender.sendMessage("Hunters are disabled. Thank God!");
+        }
+
         setWeather(commandSender);
     }
 

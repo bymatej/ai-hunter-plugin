@@ -9,8 +9,8 @@ description: AI Hunter plugin
 website: bymatej.com
 commands:
   aihunter:
-    description: Starts the AI hunter(s). If the second parameter, the number of hunters, is ommited it defaults to 1.
-    usage: <command> hunterName numberOfHunters
+    description: Starts the AI hunter(s). If the last parameter, the number of hunters, is ommited it defaults to 1.
+    usage: <command> <action> hunterName numberOfHunters
     aliases:
       - hunter
       - ai
