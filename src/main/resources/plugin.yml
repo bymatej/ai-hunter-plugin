@@ -7,6 +7,7 @@ load: STARTUP
 authors: [ Matej ]
 description: AI Hunter plugin
 website: bymatej.com
+depend: [Citizens]
 commands:
   aihunter:
     description: Starts the AI hunter(s). If the last parameter, the number of hunters, is ommited it defaults to 1.

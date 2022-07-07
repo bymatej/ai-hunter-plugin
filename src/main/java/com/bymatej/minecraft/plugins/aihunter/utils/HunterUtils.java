@@ -1,20 +1,17 @@
 package com.bymatej.minecraft.plugins.aihunter.utils;
 
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 
 import com.bymatej.minecraft.plugins.aihunter.actions.HunterStuckAction;
+import com.bymatej.minecraft.plugins.aihunter.events.HunterFreezeEvent;
 import com.bymatej.minecraft.plugins.aihunter.loadout.HunterLoadout;
 import com.bymatej.minecraft.plugins.aihunter.traits.HunterFollow;
 import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
@@ -30,6 +27,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
 import static net.citizensnpcs.api.CitizensAPI.getNPCRegistry;
 import static net.citizensnpcs.npc.EntityControllers.createForType;
+import static org.bukkit.Bukkit.getPluginManager;
+import static org.bukkit.ChatColor.AQUA;
+import static org.bukkit.ChatColor.DARK_RED;
 import static org.bukkit.Location.normalizeYaw;
 import static org.bukkit.Material.valueOf;
 import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
@@ -119,50 +119,30 @@ public class HunterUtils {
         Location initialLocation = commandSender.getLocation();
         int movementDelay = config.getInt("hunter_move_delay_seconds", 10);
         boolean isHunterInvulnerable = config.getBoolean("hunter_armed_invulnerable", false);
+        CountdownTimer countdownTimer = new CountdownTimer(getPluginReference(), movementDelay,
+                                                           () -> getPluginReference()
+                                                                   .getServer()
+                                                                   .broadcastMessage(DARK_RED + "[HUNTERS ARE FROZEN] " + AQUA + format(
+                                                                     "Hunters will be repeatedly teleported back to to %s/%s/%s for %s seconds.",
+                                                                     initialLocation.getBlockX(),
+                                                                     initialLocation.getBlockY(),
+                                                                     initialLocation.getBlockZ(),
+                                                                     movementDelay)),
+                                                           () -> getPluginReference()
+                                                                   .getServer()
+                                                                   .broadcastMessage(DARK_RED + "[HUNT STARTED] " + AQUA + "The hunters are unfrozen!"),
+                                                           timer -> {
+                                                               getPluginReference()
+                                                                 .getServer()
+                                                                 .broadcastMessage(DARK_RED + "[COUNTDOWN] " + AQUA + format(
+                                                                   "The hunter will start hunting you in %s seconds.", timer.getSecondsLeft()));
 
-        getPluginReference().getServer().broadcastMessage(format("Hunters will be repeatedly teleported back to to %s/%s/%s for %s seconds.",
-                                                                 initialLocation.getX(),
-                                                                 initialLocation.getY(),
-                                                                 initialLocation.getZ(),
-                                                                 movementDelay));
-
-        long lastSec = 0;
-        long initSec = System.currentTimeMillis() / 1000;
-        long sec = 0;
-        while (true) {
-            if (sec == 0) {
-                sec = initSec;
-            } else {
-                sec = System.currentTimeMillis() / 1000;
-            }
-
-            if (sec != lastSec) {
-                getPluginReference().getAiHunters().forEach(npc -> {
-                    // Get Data
-                    Entity entity = npc.getEntity();
-                    entity.setInvulnerable(false);
-
-                    // Teleporting
-                    entity.setInvulnerable(true);
-                    npc.teleport(initialLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                });
-
-                // Messages
-                long secLeft = 0;
-                if (lastSec == 0) {
-                    secLeft = movementDelay;
-                } else {
-                    secLeft = movementDelay - (lastSec - initSec);
-                }
-                getPluginReference().getServer().broadcastMessage((format("The hunter will start hunting you in %s seconds.", secLeft)));
-                Bukkit.getLogger().log(Level.INFO, "Hunter sleeps for " + secLeft + " more seconds");
-                lastSec = sec;
-            }
-
-            if ((lastSec - initSec) == movementDelay) { //todo: move to while instead of while(true)
-                break;
-            }
-        }
+                                                               getPluginReference().getAiHunters().forEach(npc -> {
+                                                                   HunterFreezeEvent hunterFreezeEvent = new HunterFreezeEvent(npc, initialLocation);
+                                                                   getPluginManager().callEvent(hunterFreezeEvent);
+                                                               });
+                                                           });
+        countdownTimer.scheduleTimer();
 
         getPluginReference().getAiHunters().forEach(npc -> {
             Entity entity = npc.getEntity();

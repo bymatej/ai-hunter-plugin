@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.bymatej.minecraft.plugins.aihunter.commands.AiHunterCommand;
 import com.bymatej.minecraft.plugins.aihunter.listeners.EntityDeathEventListener;
+import com.bymatej.minecraft.plugins.aihunter.listeners.HunterFreezeEventListener;
 import com.bymatej.minecraft.plugins.aihunter.listeners.HunterToggleEventListener;
 
 import net.citizensnpcs.api.npc.NPC;
@@ -51,6 +52,7 @@ public final class AiHunterPlugin extends JavaPlugin {
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new HunterToggleEventListener(), this);
         pluginManager.registerEvents(new EntityDeathEventListener(), this);
+        pluginManager.registerEvents(new HunterFreezeEventListener(), this);
     }
 
     @Override
