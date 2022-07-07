@@ -235,12 +235,12 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void displayInfoForHunterName(Player sender, String hunterName) {
-        Optional<NPC> first = getPluginReference().getAiHunters().stream()
+        Optional<NPC> optionalHunter = getPluginReference().getAiHunters().stream()
                                                   .filter(h -> h.getName().equalsIgnoreCase(hunterName))
                                                   .findFirst();
 
-        if (first.isPresent()) {
-            displayHunterInfo(sender, singletonList(first.get()));
+        if (optionalHunter.isPresent()) {
+            displayHunterInfo(sender, singletonList(optionalHunter.get()));
         } else {
             throw new CommandException("There is no hunter with name " + hunterName);
         }
@@ -265,12 +265,12 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void pauseHunterForName(String hunterName) {
-        Optional<NPC> first = getPluginReference().getAiHunters().stream()
+        Optional<NPC> optionalHunter = getPluginReference().getAiHunters().stream()
                                                   .filter(h -> h.getName().equalsIgnoreCase(hunterName))
                                                   .findFirst();
 
-        if (first.isPresent()) {
-            pauseHunter(singletonList(first.get()));
+        if (optionalHunter.isPresent()) {
+            pauseHunter(singletonList(optionalHunter.get()));
         } else {
             throw new CommandException("There is no hunter with name " + hunterName);
         }
@@ -295,12 +295,12 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void resumeHunterForName(Player sender, String hunterName) {
-        Optional<NPC> first = getPluginReference().getAiHunters().stream()
+        Optional<NPC> optionalHunter = getPluginReference().getAiHunters().stream()
                                                   .filter(h -> h.getName().equalsIgnoreCase(hunterName))
                                                   .findFirst();
 
-        if (first.isPresent()) {
-            resumeHunter(sender, singletonList(first.get()));
+        if (optionalHunter.isPresent()) {
+            resumeHunter(sender, singletonList(optionalHunter.get()));
         } else {
             throw new CommandException("There is no hunter with name " + hunterName);
         }

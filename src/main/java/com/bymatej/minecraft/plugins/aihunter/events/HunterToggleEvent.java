@@ -24,7 +24,7 @@ public class HunterToggleEvent extends PlayerEvent implements Cancellable {
     public HunterToggleEvent(String hunterName, int numberOfHunters, HunterStatus status, Player player) {
         super(player);
         if (OFF.equals(status)) {
-            this.hunterName = null;
+            this.hunterName = hunterName;
             this.numberOfHunters = 0;
         } else {
             this.hunterName = hunterName;

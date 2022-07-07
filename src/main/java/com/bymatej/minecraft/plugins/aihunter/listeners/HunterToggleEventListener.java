@@ -73,7 +73,11 @@ public class HunterToggleEventListener implements Listener {
                 hunter.despawn();
                 hunter.destroy();
                 getPluginReference().getAiHunters().remove(hunter);
-                commandSender.sendMessage("Hunters " + event.getHunterName() + " is disabled!");
+                if (commandSender != null) {
+                    commandSender.sendMessage("Hunters " + event.getHunterName() + " is removed!");
+                } else {
+                    getPluginReference().getServer().broadcastMessage("Hunters " + event.getHunterName() + " is removed!");
+                }
             } else {
                 throw new CommandException("Hunter with name " + event.getHunterName() + " does not exist.");
             }
@@ -86,14 +90,18 @@ public class HunterToggleEventListener implements Listener {
                 hunter.destroy();
             });
             getPluginReference().getAiHunters().clear();
-            commandSender.sendMessage("Hunters are disabled. Thank God!");
+            if (commandSender != null) {
+                commandSender.sendMessage("Hunters are disabled. Thank God!");
+            } else {
+                getPluginReference().getServer().broadcastMessage("Hunters are disabled. Thank God!");
+            }
         }
 
         setWeather(commandSender);
     }
 
     private void setWeather(Player player) {
-        if (getPluginReference().getConfig().getBoolean("day_and_clear_weather_on_hunter_toggle", true)) {
+        if (player != null && getPluginReference().getConfig().getBoolean("day_and_clear_weather_on_hunter_toggle", true)) {
             World world = player.getWorld();
             world.setTime(1000L); // day
             world.setStorm(false); // no storm
