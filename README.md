@@ -42,12 +42,20 @@ Build and deploy locally
 ./gradlew clean build && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar
 ```
  
-Cleanup, build and deploy locally
+Cleanup, build and deploy locally (for v17)
 ```
 ./gradlew clean build && rm -rf ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin/ && rm ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.17.1/plugins/AiHunterPlugin.jar
 ```
 
+Cleanup, build and deploy locally (for v18)
+```
+./gradlew clean build && rm -rf ~/projects/private/minecraft/spigot-server-1.18.2/plugins/AiHunterPlugin/ && rm ~/projects/private/minecraft/spigot-server-1.18.2/plugins/AiHunterPlugin.jar && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.18.2/plugins/AiHunterPlugin.jar
+```
 
+Cleanup, build and deploy locally (for v19)
+```
+./gradlew clean build && rm -rf ~/projects/private/minecraft/spigot-server-1.19/plugins/AiHunterPlugin/ || true && rm ~/projects/private/minecraft/spigot-server-1.19/plugins/AiHunterPlugin.jar || true && ln -s ~/projects/private/ai-hunter-plugin/build/libs/AiHunterPlugin-0.1-SNAPSHOT.jar ~/projects/private/minecraft/spigot-server-1.19/plugins/AiHunterPlugin.jar
+```
 
 # Possible commands
 CREATE:

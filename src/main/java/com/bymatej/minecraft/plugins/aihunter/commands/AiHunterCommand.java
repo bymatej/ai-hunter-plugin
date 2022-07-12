@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -44,8 +43,9 @@ import static java.lang.String.join;
 import static java.util.Collections.singletonList;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.apache.commons.lang.StringUtils.isNumeric;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.bukkit.Bukkit.getPluginManager;
 
 public class AiHunterCommand implements CommandExecutor {
@@ -308,7 +308,7 @@ public class AiHunterCommand implements CommandExecutor {
 
     private void validateDesiredAiHunterName(CommandSender sender, String aiHunterName) {
         // Name must not be null/blank
-        if (StringUtils.isBlank(aiHunterName)) {
+        if (isBlank(aiHunterName)) {
             String message = "Hunter name must not be blank!";
             sender.sendMessage(message);
             log(WARNING, message);
@@ -374,7 +374,7 @@ public class AiHunterCommand implements CommandExecutor {
     }
 
     private void turnAiHunterOn(String aiHunterName, int numberOfHunters, Player player) {
-        if (StringUtils.isBlank(aiHunterName)) {
+        if (isBlank(aiHunterName)) {
             aiHunterName = "Bot Mutant";
         }
 

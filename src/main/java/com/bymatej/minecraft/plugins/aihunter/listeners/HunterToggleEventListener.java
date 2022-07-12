@@ -23,7 +23,7 @@ import static com.bymatej.minecraft.plugins.aihunter.utils.HunterUtils.freezeHun
 import static com.bymatej.minecraft.plugins.aihunter.utils.LoggingUtils.log;
 import static java.lang.String.format;
 import static java.util.logging.Level.SEVERE;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HunterToggleEventListener implements Listener {
 

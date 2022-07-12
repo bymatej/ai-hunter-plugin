@@ -32,6 +32,7 @@ import net.citizensnpcs.api.npc.BlockBreaker;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Equipment;
+import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
 import net.citizensnpcs.util.Util;
 
@@ -502,7 +503,7 @@ public class HunterTrait extends Trait {
     }
 
     private void lookDown() {
-        Util.assumePose(getLivingEntity(), getLivingEntity().getLocation().getYaw(), 90);
+        NMS.look(getLivingEntity(), getLivingEntity().getLocation().getYaw(), 90); // replacement for Util.assumePose
     }
 
     private boolean canPlaceBlock(Location location) {

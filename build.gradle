@@ -27,9 +27,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT'
-    compileOnly 'net.citizensnpcs:citizens-main:2.0.28-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
+    compileOnly 'net.citizensnpcs:citizens-main:2.0.30-SNAPSHOT'
     implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
 
     // Tests
     testCompileOnly 'org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT'
