@@ -128,9 +128,19 @@ public class HunterUtils {
                                                                      initialLocation.getBlockY(),
                                                                      initialLocation.getBlockZ(),
                                                                      movementDelay)),
-                                                           () -> getPluginReference()
-                                                                   .getServer()
-                                                                   .broadcastMessage(DARK_RED + "[HUNT STARTED] " + AQUA + "The hunters are unfrozen!"),
+                                                           () -> {
+                                                               getPluginReference()
+                                                                 .getServer()
+                                                                 .broadcastMessage(DARK_RED + "[HUNT STARTED] " + AQUA + "The hunters are unfrozen!");
+
+                                                               getPluginReference().getAiHunters().forEach(npc -> {
+                                                                   Entity entity = npc.getEntity();
+                                                                   entity.setInvulnerable(isHunterInvulnerable);
+
+                                                                   HunterTrait hunterTrait = new HunterTrait(npc, new HunterLoadout(getPluginReference())); // todo: remove newLoadout
+                                                                   npc.addTrait(hunterTrait);
+                                                               });
+                                                           },
                                                            timer -> {
                                                                getPluginReference()
                                                                  .getServer()
@@ -143,11 +153,6 @@ public class HunterUtils {
                                                                });
                                                            });
         countdownTimer.scheduleTimer();
-
-        getPluginReference().getAiHunters().forEach(npc -> {
-            Entity entity = npc.getEntity();
-            entity.setInvulnerable(isHunterInvulnerable);
-        });
     }
 
     public static void createHunter(String hunterName, int id, Player commandSender) {//todo: finish up this method and add loadout stuff to the calling method before for loop and pass it on here

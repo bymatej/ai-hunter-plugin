@@ -3,8 +3,11 @@ package com.bymatej.minecraft.plugins.aihunter.listeners;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.util.Vector;
 
 import com.bymatej.minecraft.plugins.aihunter.events.HunterFreezeEvent;
+import com.bymatej.minecraft.plugins.aihunter.traits.HunterFollow;
+import com.bymatej.minecraft.plugins.aihunter.traits.HunterTrait;
 
 import net.citizensnpcs.api.npc.NPC;
 
@@ -23,6 +26,7 @@ public class HunterFreezeEventListener implements Listener {
 
             Entity eventEntity = event.getEntity();
             eventEntity.setInvulnerable(true);
+            hunter.getOrAddTrait(HunterTrait.class).setDelete(true);
         } else {
             if (debug) {
                 printDebuggingInfo(event);

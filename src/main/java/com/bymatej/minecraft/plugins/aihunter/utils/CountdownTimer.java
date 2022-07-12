@@ -96,7 +96,15 @@ public class CountdownTimer implements Runnable {
      */
     public void scheduleTimer() {
         // Initialize our assigned task's id, for later use so we can cancel
-        this.assignedTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0L, 20L);
+        scheduleTimer(0L, 20L);
+    }
+
+    /**
+     * Schedules this instance to run with a delay and with period in ticks
+     */
+    public void scheduleTimer(long delay, long period) {
+        // Initialize our assigned task's id, for later use so we can cancel
+        this.assignedTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, delay, period);
     }
 
 }
